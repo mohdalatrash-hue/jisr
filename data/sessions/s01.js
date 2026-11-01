@@ -4,18 +4,18 @@ JISR_DATA({
   warmup: "Stand up and find three people. Ask: “What's your name?” and “What do you do?” Remember one fact about each person.",
   grammar: {
     title: "The verb to be + possessives",
-    points: ["I am (I'm) · you are (you're) · he / she is (he's / she's) · we / they are (we're / they're)", "Questions: Are you an engineer? — Yes, I am. / No, I'm not.", "my · your · his · her · our · their: “Her name is Nouf. Their office is on the second floor.”", "a / an + job: a manager, an engineer, an inspector"],
+    points: ["I am (I'm) · you are (you're) · he / she is (he's / she's) · we / they are (we're / they're)", "Questions: Are you an engineer? — Yes, I am. / No, I'm not.", "my · your · his · her · our · their: “His name is Nasser. Their office is on the second floor.”", "a / an + job: a manager, an engineer, an inspector"],
     quiz: [
       { t: "mcq", q: "Faisal ___ an engineer in the Planning Department.", o: ["am", "is", "are"], a: 1, why: "He / she / it → is." },
       { t: "mcq", q: "We ___ from the Licensing Department.", o: ["is", "am", "are"], a: 2, why: "We / you / they → are." },
-      { t: "mcq", q: "This is Reem. ___ job is very interesting.", o: ["His", "Her", "Their"], a: 1, why: "Reem is a woman → her." },
+      { t: "mcq", q: "This is Rakan. ___ job is very interesting.", o: ["His", "Her", "Their"], a: 0, why: "Rakan is a man → his." },
       { t: "mcq", q: "I'm ___ inspector.", o: ["a", "an", "—"], a: 1, why: "“inspector” starts with a vowel sound → an." },
       { t: "gap", q: "“Are you new here?” — “Yes, I ___.”", a: ["am"], why: "Short answer: Yes, I am. (Not “Yes, I'm.”)" }
     ]
   },
   vocab: [
     ["municipality", "البلدية", "I work for the municipality."],
-    ["department", "إدارة / قسم", "She works in the Parks Department."],
+    ["department", "إدارة / قسم", "He works in the Parks Department."],
     ["employee", "موظف", "There are 300 employees here."],
     ["manager", "مدير", "My manager is very helpful."],
     ["engineer", "مهندس", "He is a civil engineer."],
@@ -34,11 +34,11 @@ JISR_DATA({
   listening: [{
     title: "First day of the Jisr programme",
     intro: "Three municipality employees meet before class. Listen and answer.",
-    speakers: { A: "Abdullah", B: "Nouf", C: "Turki" },
+    speakers: { A: "Abdullah", B: "Nasser", C: "Turki" },
     lines: [
       ["A", "Good morning! Is this the room for the English course?"],
-      ["B", "Yes, it is. Good morning. I'm Nouf. I work in the Licensing Department."],
-      ["A", "Nice to meet you, Nouf. My name is Abdullah. I'm an engineer in the Planning Department."],
+      ["B", "Yes, it is. Good morning. I'm Nasser. I work in the Licensing Department."],
+      ["A", "Nice to meet you, Nasser. My name is Abdullah. I'm an engineer in the Planning Department."],
       ["B", "Nice to meet you, too. Are you from Buraidah?"],
       ["A", "No, I'm not. I'm from Unaizah, but I live in Buraidah now."],
       ["C", "Hello, everyone. Sorry I'm late. I'm Turki."],
@@ -47,7 +47,7 @@ JISR_DATA({
       ["A", "Mine too. It's exciting."]
     ],
     questions: [
-      { t: "mcq", q: "Where does Nouf work?", o: ["Planning", "Licensing", "Parks"], a: 1 },
+      { t: "mcq", q: "Where does Nasser work?", o: ["Planning", "Licensing", "Parks"], a: 1 },
       { t: "mcq", q: "What is Abdullah's job?", o: ["inspector", "manager", "engineer"], a: 2 },
       { t: "tf", q: "Abdullah is from Buraidah.", a: false, why: "He is from Unaizah but lives in Buraidah." },
       { t: "tf", q: "Turki arrives late.", a: true, why: "He says “Sorry I'm late.”" },
@@ -60,16 +60,16 @@ JISR_DATA({
     intro: "Read the profiles from the programme's welcome page.",
     text: [
       "Saad Aldosari is 34 years old. He is a supervisor in the Waste Management Department. His team cleans the streets of the city every night. Saad wants to learn English because many workers in his team are from other countries.",
-      "Hessa Almutairi is a customer service officer. She works at the main service counter. Every day she helps people with permits, payments and questions. Some visitors are tourists or foreign investors, so English is important in her job.",
+      "Hamad Almutairi is a customer service officer. He works at the main service counter. Every day he helps people with permits, payments and questions. Some visitors are tourists or foreign investors, so English is important in his job.",
       "Majed Alrashidi is a young architect. He designs public parks and walking paths. He often reads technical documents in English, and next year he wants to attend an international conference on green cities."
     ],
     glossary: [["supervisor", "مشرف"], ["permits", "تصاريح"], ["investors", "مستثمرون"], ["architect", "مهندس معماري"], ["conference", "مؤتمر"]],
     questions: [
       { t: "mcq", q: "Why does Saad want to learn English?", o: ["For a conference", "Because workers in his team speak other languages", "For tourists at the counter"], a: 1 },
-      { t: "tf", q: "Hessa works at the main service counter.", a: true },
+      { t: "tf", q: "Hamad works at the main service counter.", a: true },
       { t: "tf", q: "Majed designs buildings for hospitals.", a: false, why: "He designs public parks and walking paths." },
       { t: "gap", q: "Saad's team cleans the streets every ___.", a: ["night"] },
-      { t: "mcq", q: "Who reads technical documents in English?", o: ["Saad", "Hessa", "Majed"], a: 2 }
+      { t: "mcq", q: "Who reads technical documents in English?", o: ["Saad", "Hamad", "Majed"], a: 2 }
     ]
   }],
   roleplay: [{
@@ -77,16 +77,16 @@ JISR_DATA({
     scene: "It is the first day of training. You meet someone new at the coffee break.",
     you: "Trainee", npc: "New colleague",
     steps: [
-      { npc: "Hi! I don't think we've met. I'm Sara.", hint: "Greet her and say your name.", keys: [["name"], ["i'm"], ["i am"]], model: "Hi Sara, nice to meet you. I'm Ahmed." },
+      { npc: "Hi! I don't think we've met. I'm Sami.", hint: "Greet him and say your name.", keys: [["name"], ["i'm"], ["i am"]], model: "Hi Sami, nice to meet you. I'm Ahmed." },
       { npc: "Nice to meet you. Which department are you in?", hint: "Say your department.", keys: [["department"], ["i work"]], model: "I'm in the Parks Department." },
       { npc: "Oh, interesting! What do you do there?", hint: "Say your job: I'm a / an …", keys: [["i'm a"], ["i am a"], ["i'm an"], ["i am an"]], model: "I'm an engineer. I plan new parks." },
       { npc: "Can you spell your family name for me? I want to add you to our WhatsApp group.", hint: "Spell your family name letter by letter.", keys: [], model: "Sure. A-L-H-A-R-B-I." },
-      { npc: "Great, thanks. See you in class!", hint: "Say goodbye politely.", keys: [["see you"], ["bye"], ["thank"]], model: "See you later, Sara. Have a good day!" }
+      { npc: "Great, thanks. See you in class!", hint: "Say goodbye politely.", keys: [["see you"], ["bye"], ["thank"]], model: "See you later, Sami. Have a good day!" }
     ],
-    ai: "You are Sara, a new trainee from the Planning Department, meeting the trainee at a coffee break on the first day of an English course. Ask about their name, job, department and city."
+    ai: "You are Sami, a new trainee from the Planning Department, meeting the trainee at a coffee break on the first day of an English course. Ask about their name, job, department and city."
   }],
   speaking: {
-    readAloud: ["Good morning. My name is Abdullah.", "I'm an engineer in the Planning Department.", "Nice to meet you, too.", "Can you spell your name, please?", "This is my colleague. Her name is Nouf."],
+    readAloud: ["Good morning. My name is Abdullah.", "I'm an engineer in the Planning Department.", "Nice to meet you, too.", "Can you spell your name, please?", "This is my colleague. His name is Nasser."],
     tasks: [{ q: "Introduce yourself: your name, your job, your department and where you are from.", time: 45, tips: ["My name is … / I'm …", "I work in the … Department.", "I'm a / an …", "I'm from … and I live in …"] }]
   },
   writing: [{

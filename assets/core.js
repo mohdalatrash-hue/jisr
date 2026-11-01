@@ -61,13 +61,23 @@
   let voices = [];
   function loadVoices() { voices = (window.speechSynthesis && speechSynthesis.getVoices()) || []; }
   if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+  // Male voices only (the programme is taught mainly to men).
+  const MALE = /\b(male|daniel|alex|fred|aaron|arthur|guy|ryan|andrew|christopher|eric|davis|tom|thomas|oliver|george|rishi|brian|roger|steffan|william|james|liam|jason|tony|brandon|reed|gordon|ralph|junior|david|mark|richard|prabhat|connor|mitchell|ethan|noah|elliot)\b/i;
+  const FEMALE = /\b(female|samantha|victoria|karen|moira|tessa|fiona|serena|susan|zira|aria|jenny|libby|sonia|kate|allison|ava|nicky|martha|emma|olivia|jane|hazel|catherine|natasha|michelle|nancy|sara|ana|clara|emily|amy|joanna|salli|kimberly|ivy|kendra|heera|veena|isha|neerja|zoe|shelley|sandy|flo|grandma)\b/i;
+  function maleVoices() {
+    const en = voices.filter(v => /^en[-_]/i.test(v.lang));
+    const m = en.filter(v => MALE.test(v.name) && !FEMALE.test(v.name));
+    const rank = v => (/natural|neural|enhanced|premium|google/i.test(v.name) ? 0 : 1) + (/en[-_](US|GB)/i.test(v.lang) ? 0 : 1);
+    return m.sort((a, b) => rank(a) - rank(b));
+  }
   function pickVoice(slot) {
     const en = voices.filter(v => /^en[-_]/i.test(v.lang));
     if (!en.length) return null;
     const pref = LS.get("voices", {});
     if (pref[slot]) { const f = en.find(v => v.name === pref[slot]); if (f) return f; }
-    const good = en.filter(v => /natural|neural|google|samantha|daniel|aria|jenny|guy|libby|ryan|sonia/i.test(v.name));
-    const pool = good.length >= 2 ? good : en;
+    const m = maleVoices();
+    const pool = m.length ? m : en.filter(v => !FEMALE.test(v.name));
+    if (!pool.length) return null;
     const idx = { A: 0, B: 1, C: 2, D: 3 }[slot] || 0;
     return pool[idx % pool.length];
   }
@@ -77,6 +87,8 @@
       if (!window.speechSynthesis) return res();
       const u = new SpeechSynthesisUtterance(text);
       const v = pickVoice(slot || "A"); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
+      // when only one male voice exists, make the second speaker sound different
+      const m = maleVoices(); if (m.length < 2 && slot && slot !== "A") u.pitch = slot === "B" ? 0.8 : 1.15; else u.pitch = v && MALE.test(v.name) ? 1 : 0.7;
       u.rate = rate(); u.onend = res; u.onerror = res;
       speechSynthesis.speak(u);
     });
@@ -158,12 +170,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const J = window.JISR, h = document.getElementById("site-header");
   if (h) {
     const here = location.pathname.split("/").pop() || "index.html";
-    const nav = [["index.html", "Home", "الرئيسية"], ["checkin.html", "Check in", "تسجيل الحضور"], ["schedule.html", "Schedule", "الجدول"], ["speak.html", "Speaking Lab", "مختبر المحادثة"], ["me.html", "My progress", "تقدّمي"]];
-    h.innerHTML = `<a class="brand" href="index.html"><span class="mark" aria-hidden="true"><svg viewBox="0 0 40 24"><path d="M2 20 Q20 -6 38 20" fill="none" stroke="currentColor" stroke-width="3"/><path d="M2 20h36M9 20V12M15 20V7M20 20V5M25 20V7M31 20V12" stroke="currentColor" stroke-width="2"/></svg></span><span><b>${J.esc(J.C.programEn)}</b> <span class="ar">${J.esc(J.C.programAr)}</span></span></a>
-      <nav>${nav.map(n => `<a href="${n[0]}" class="${here === n[0] ? "on" : ""}">${n[1]}<small class="ar">${n[2]}</small></a>`).join("")}</nav>
-      <div class="who" id="who"></div>`;
-    const u = J.me(), who = document.getElementById("who");
-    who.innerHTML = u ? `<span class="chip">👤 ${J.esc(u.name)}</span>` : `<a class="chip warn" href="me.html">Sign in · <span class="ar">سجّل اسمك</span></a>`;
-    if (!J.online) who.insertAdjacentHTML("beforeend", `<span class="chip ghost" title="Backend not connected yet — data stays on this device">demo</span>`);
+    const nav = [["checkin.html", "Check in"], ["schedule.html", "Lessons"], ["speak.html", "Speaking Lab"], ["me.html", "Me"]];
+    h.innerHTML = `<a class="brand" href="index.html"><span class="mark" aria-hidden="true"><svg viewBox="0 0 40 24"><path d="M2 20 Q20 -4 38 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M2 21h36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>${J.esc(J.C.programEn)} <span class="ar">${J.esc(J.C.programAr)}</span></a>
+      <nav>${nav.map(n => `<a href="${n[0]}" class="${here === n[0] ? "on" : ""}">${n[1]}</a>`).join("")}</nav>
+      <div class="who">${J.me() ? J.esc(J.me().name.split(" ")[0]) : ""}</div>`;
   }
 });

@@ -10,8 +10,14 @@
     <p class="muted" id="gmsg"></p>
   </div>
   <div id="app" style="display:none">
+    <section class="band no-print center" style="margin-top:0">
+      <h2 style="margin-bottom:4px">Attendance report</h2>
+      <p class="muted" id="saved">Every check-in is recorded automatically.</p>
+      <div class="row" style="justify-content:center;margin-top:14px"><button class="btn big" id="exportAll">⬇ Export attendance</button><button class="btn alt big" id="printAll">Print</button></div>
+      <p id="sheetLink" style="margin-top:12px;font-size:.9rem"></p>
+    </section>
     <div class="tabs no-print" id="tabs">
-      <button data-k="today" class="on">Today / code</button><button data-k="day">Daily report</button><button data-k="week">Weekly report</button><button data-k="all">Full register</button><button data-k="work">Activity &amp; scores</button>
+      <button data-k="today" class="on">Today / code</button><button data-k="day">Daily report</button><button data-k="week">Weekly report</button><button data-k="all">All sessions</button><button data-k="work">Activity &amp; scores</button>
     </div>
     <section class="panel on" id="p-today"></section>
     <section class="panel" id="p-day"></section>
@@ -28,7 +34,7 @@
   const ST={P:"Present",A:"Absent",L:"Late",E:"Excused","–":"Pending"};
 
   function demoData(){ // preview data when backend is not connected
-    const names=["Abdullah Alharbi","Faisal Alotaibi","Nouf Alqahtani","Saad Aldosari","Reem Alshammari","Turki Alenezi","Hessa Almutairi","Majed Alrashidi"];
+    const names=["Abdullah Alharbi","Faisal Alotaibi","Nasser Alqahtani","Saad Aldosari","Rakan Alshammari","Turki Alenezi","Hamad Almutairi","Majed Alrashidi"];
     const roster=names.map((n,i)=>({id:String(1001+i),name:n,dept:["Parks","Licensing","Planning","Waste","Customer Service"][i%5]}));
     const att=[];const hs=J.S.slice(0,Math.max(6,held().length));
     hs.forEach(s=>roster.forEach((r,i)=>{const x=(i*7+s.n*3)%10;if(x<8)att.push({date:s.date,session:s.n,traineeId:r.id,name:r.name,status:x===7?"L":"P",time:s.date+"T09:0"+(x%6)+":00",device:"d"+r.id,method:"code"});}));
@@ -39,6 +45,7 @@
     if(!r.ok){$("gmsg").textContent="⚠ "+(r.error||"Failed");$("gate").style.display="block";$("app").style.display="none";return false;}
     D=r;sessionStorage.setItem("jisr.key",key);$("gate").style.display="none";$("app").style.display="block";
     if(r.demo&&!$("demo"))$("app").insertAdjacentHTML("afterbegin",'<p class="notice no-print" id="demo">Preview with sample data — connect the backend (config.js → apiUrl) to see real attendance.</p>');
+    if(D.sheetUrl){$("sheetLink").innerHTML=`Permanent record: <a href="${J.esc(D.sheetUrl)}" target="_blank" rel="noopener">open the Google Sheet</a>`;$("saved").textContent="Every check-in is recorded automatically in your Google Sheet. Website updates never touch it.";}
     drawAll();return true;
   }
   // status for trainee on a date: latest row wins; none → Absent (or Pending for today)
@@ -101,6 +108,8 @@
       document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+id));print();});
   }
   document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.k));});
+  $("exportAll").onclick=()=>{const ss=held().length?held():J.S.slice(0,1);csv(matrix(ss).csvRows,`jisr-attendance-${today}.csv`);};
+  $("printAll").onclick=()=>{head("Attendance register");document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x.dataset.k==="all"));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-all"));print();};
   $("enter").onclick=()=>{key=$("key").value.trim();load();};
   if(key||!J.online) load();
 })();

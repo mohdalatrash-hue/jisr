@@ -23,7 +23,7 @@ JISR_DATA({
     ["Excuse me", "عفوًا / لو سمحت", "Excuse me, where is the meeting room?"],
     ["Could you repeat that?", "هل يمكنك إعادة ذلك؟", "Sorry, could you repeat that, please?"],
     ["business card", "بطاقة عمل", "Here is my business card."],
-    ["director", "مدير عام / مدير إدارة", "She is the director of planning."],
+    ["director", "مدير عام / مدير إدارة", "He is the director of planning."],
     ["How was your trip?", "كيف كانت رحلتك؟", "How was your trip? — It was fine, thanks."]
   ],
   vocabQuiz: [
@@ -32,10 +32,10 @@ JISR_DATA({
   ],
   listening: [{
     title: "Welcoming a visiting delegation",
-    intro: "Hessa welcomes two visitors from a smart-city company and introduces her director.",
-    speakers: { A: "Hessa", B: "Mr Brown", C: "Director" },
+    intro: "Hamad welcomes two visitors from a smart-city company and introduces his director.",
+    speakers: { A: "Hamad", B: "Mr Brown", C: "Director" },
     lines: [
-      ["A", "Good morning, and welcome to the municipality. I'm Hessa Almutairi from Customer Relations."],
+      ["A", "Good morning, and welcome to the municipality. I'm Hamad Almutairi from Customer Relations."],
       ["B", "Good morning. I'm David Brown from SmartWay Solutions. Pleased to meet you."],
       ["A", "Pleased to meet you too, Mr Brown. How was your trip?"],
       ["B", "It was long, but fine, thank you. We flew from London to Riyadh yesterday."],
@@ -69,16 +69,16 @@ JISR_DATA({
   }],
   roleplay: [{
     title: "Welcome the visitor and introduce your manager",
-    scene: "A visitor from an international company arrives at your office. Welcome her, make small talk and introduce your manager.",
-    you: "Municipality employee", npc: "Ms Clara Weber (visitor)",
+    scene: "A visitor from an international company arrives at your office. Welcome him, make small talk and introduce your manager.",
+    you: "Municipality employee", npc: "Mr Carl Weber (visitor)",
     steps: [
-      { npc: "Good morning. I have a meeting with the Director of Parks at ten.", hint: "Greet her formally, welcome her, say your name.", keys: [["welcome"], ["good morning"]], model: "Good morning, and welcome. I'm Faisal from the Parks Department." },
-      { npc: "Thank you. I'm Clara Weber from GreenTech.", hint: "Say you're pleased to meet her. Ask about her trip.", keys: [["trip"], ["journey"], ["flight"]], model: "Pleased to meet you, Ms Weber. How was your trip?" },
-      { npc: "It was fine, thanks. It's my first time in Qassim.", hint: "Respond kindly. Offer her something to drink.", keys: [["coffee"], ["tea"], ["water"], ["drink"]], model: "Welcome! Would you like some Arabic coffee or water?" },
+      { npc: "Good morning. I have a meeting with the Director of Parks at ten.", hint: "Greet him formally, welcome him, say your name.", keys: [["welcome"], ["good morning"]], model: "Good morning, and welcome. I'm Faisal from the Parks Department." },
+      { npc: "Thank you. I'm Carl Weber from GreenTech.", hint: "Say you're pleased to meet him. Ask about his trip.", keys: [["trip"], ["journey"], ["flight"]], model: "Pleased to meet you, Mr Weber. How was your trip?" },
+      { npc: "It was fine, thanks. It's my first time in Qassim.", hint: "Respond kindly. Offer him something to drink.", keys: [["coffee"], ["tea"], ["water"], ["drink"]], model: "Welcome! Would you like some Arabic coffee or water?" },
       { npc: "Coffee would be lovely, thank you.", hint: "Introduce your manager: Let me introduce…", keys: [["introduce"], ["this is"]], model: "Let me introduce my manager, Mr Saleh Alharbi, Director of Parks." },
       { npc: "Sorry, what was his name again?", hint: "Repeat the name slowly and spell it.", keys: [], model: "Saleh. S-A-L-E-H. Saleh Alharbi." }
     ],
-    ai: "You are Clara Weber, a German visitor from GreenTech arriving at the municipality for a meeting. Make polite small talk (trip, weather, city) and ask the trainee about their job before the meeting."
+    ai: "You are Carl Weber, a German visitor from GreenTech arriving at the municipality for a meeting. Make polite small talk (trip, weather, city) and ask the trainee about their job before the meeting."
   }],
   speaking: {
     readAloud: ["Good afternoon, and welcome to the municipality.", "Pleased to meet you. How was your trip?", "Let me introduce our Director of Planning.", "Sorry, could you repeat that, please?", "Here is my business card."],
@@ -89,5 +89,5 @@ JISR_DATA({
     checklist: ["One welcome sentence", "Five questions with question marks", "Safe topics only (trip, weather, city, food, work)"],
     model: "Welcome to Buraidah! We are happy to have you here.\n1. How was your trip?\n2. Is this your first visit to Saudi Arabia?\n3. How do you like the weather?\n4. Have you tried Arabic coffee?\n5. What does your company do?"
   }],
-  homework: ["Do the role-play twice — once with your voice only.", "Try the free AI conversation as Clara Weber.", "Read-aloud: reach 80% on all five sentences.", "Learn how to spell your full name in English quickly."]
+  homework: ["Do the role-play twice — once with your voice only.", "Try the free AI conversation as Carl Weber.", "Read-aloud: reach 80% on all five sentences.", "Learn how to spell your full name in English quickly."]
 });

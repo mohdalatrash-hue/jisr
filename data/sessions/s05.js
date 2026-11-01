@@ -37,7 +37,7 @@ JISR_DATA({
     lines: [
       ["B", "Excuse me. Where can I pay a traffic fine?"],
       ["A", "Payments are on the ground floor. Go straight ahead. The payment desk is at the end, opposite the café."],
-      ["C", "Hello. I have an appointment with Eng. Reem in Urban Planning at nine."],
+      ["C", "Hello. I have an appointment with Eng. Rakan in Urban Planning at nine."],
       ["A", "Planning is on the second floor. Take the lift, turn left, and it's the third door on your right, next to the meeting rooms."],
       ["C", "Third door on the right. Thank you."],
       ["D", "Sorry, is there a prayer room in the building?"],
@@ -47,7 +47,7 @@ JISR_DATA({
       { t: "mcq", q: "Visitor 1 wants to…", o: ["meet an engineer", "pay a fine", "find a café"], a: 1 },
       { t: "mcq", q: "The payment desk is opposite the…", o: ["lift", "café", "stairs"], a: 1 },
       { t: "gap", q: "Visitor 2's appointment is at ___.", a: ["nine", "9"] },
-      { t: "tf", q: "Reem's office is the third door on the left.", a: false, why: "Third door on the right." },
+      { t: "tf", q: "Rakan's office is the third door on the left.", a: false, why: "Third door on the right." },
       { t: "gap", q: "On the ground floor, the prayer room is behind the ___.", a: ["stairs"] }
     ]
   }],

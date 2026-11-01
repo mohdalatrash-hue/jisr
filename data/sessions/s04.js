@@ -6,7 +6,7 @@ JISR_DATA({
     title: "Present simple for routines + frequency",
     points: ["I / you / we / they start at 7:30. · He / she starts at 7:30 (add -s).", "Negative: I don't work on Fridays. · She doesn't answer the phone.", "Question: Do you work on Saturdays? · Does he visit sites?", "Frequency: always 100% · usually · often · sometimes · never 0% — before the main verb: I usually check my email first."],
     quiz: [
-      { t: "mcq", q: "Nouf ___ the office at 7:30 every day.", o: ["open", "opens", "is open"], a: 1 },
+      { t: "mcq", q: "Nasser ___ the office at 7:30 every day.", o: ["open", "opens", "is open"], a: 1 },
       { t: "mcq", q: "We ___ work on Fridays.", o: ["don't", "doesn't", "aren't"], a: 0 },
       { t: "mcq", q: "___ your manager visit the sites?", o: ["Do", "Does", "Is"], a: 1 },
       { t: "mcq", q: "Choose the correct order.", o: ["I check usually my email first.", "I usually check my email first.", "Usually I my email check first."], a: 1 },

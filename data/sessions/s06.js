@@ -31,11 +31,11 @@ JISR_DATA({
   listening: [{
     title: "Podcast: “My department in one minute”",
     intro: "Three employees describe their departments on the municipality's podcast.",
-    speakers: { A: "Host", B: "Saad", C: "Hessa" },
+    speakers: { A: "Host", B: "Saad", C: "Hamad" },
     lines: [
       ["A", "Welcome to “One Minute at the Municipality”. Saad, tell us about your department."],
       ["B", "I work in Waste Management. We're responsible for collecting rubbish from forty neighbourhoods. My team works at night because the streets are quieter. Our biggest challenge is the summer heat, so we start at nine p.m. and finish before sunrise."],
-      ["A", "Thank you, Saad. Hessa?"],
+      ["A", "Thank you, Saad. Hamad?"],
       ["C", "I'm in Customer Service. We provide information and help citizens with their applications. We receive about three hundred visitors a day, but most services are online now, so the number is going down. We want to improve our phone service next year."],
       ["A", "Great. Thank you both."]
     ],
@@ -45,7 +45,7 @@ JISR_DATA({
       { t: "tf", q: "Saad's team finishes after sunrise.", a: false },
       { t: "gap", q: "Customer Service receives about ___ visitors a day.", a: ["300", "three hundred"] },
       { t: "mcq", q: "Why is the number of visitors going down?", o: ["The office is closed", "Most services are online", "Visitors go to Licensing"], a: 1 },
-      { t: "mcq", q: "What does Hessa's department want to improve?", o: ["Online payments", "The phone service", "Parking"], a: 1 }
+      { t: "mcq", q: "What does Hamad's department want to improve?", o: ["Online payments", "The phone service", "Parking"], a: 1 }
     ]
   }],
   reading: [{

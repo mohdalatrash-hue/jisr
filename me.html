@@ -1,38 +1,26 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jisr · My progress</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<title>Jisr · Me</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -4 38 20' fill='none' stroke='%231d1d1f' stroke-width='4'/></svg>">
 <link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script></head>
 <body><header id="site-header"></header>
 <main class="wrap">
-  <div class="grid g2">
-    <div class="card">
-      <span class="eyebrow">Your identity · بياناتك</span><h2>Sign in on this device</h2>
-      <p class="muted">Choose your name once. It is saved on this phone/computer and used for attendance and scores. <span class="ar">اختر اسمك مرة واحدة على هذا الجهاز.</span></p>
-      <div id="idform"></div>
-    </div>
-    <div class="card teal"><span class="eyebrow">My numbers · أرقامي</span><div id="nums"></div></div>
-  </div>
-  <div class="card" style="margin-top:16px"><span class="eyebrow">Activity log · سجل الأنشطة</span><h3>Completed activities</h3><div id="log" class="tscroll" style="max-height:none"></div></div>
-  <div class="card" style="margin-top:16px"><span class="eyebrow">Voice settings · إعدادات الصوت</span><h3>Choose the listening voices</h3><div id="voices"></div></div>
+  <section class="hero" style="padding-bottom:16px"><h1 id="hi">My progress.</h1><p class="sub" id="sub"></p></section>
+  <section class="grid g3" id="nums"></section>
+  <section class="band"><h3>Completed activities</h3><div id="log"></div></section>
+  <details class="band no-print"><summary><b>Voice</b> — choose the English voice you hear</summary><div id="voices" style="margin-top:12px"></div></details>
 </main>
 <script>
-(async function(){
-  const J=JISR,f=document.getElementById("idform"),u=J.me();
-  async function roster(){ if(!J.online) return null; const r=await J.api("roster"); return r.ok?r.roster:null; }
-  function draw(list){
-    if(u){ f.innerHTML=`<p style="font-size:1.2rem">👤 <b>${J.esc(u.name)}</b> <span class="muted">(${J.esc(u.id)})</span></p><button class="btn ghost sm" id="out">Not you? Change</button>`; document.getElementById("out").onclick=()=>{J.setMe(null);location.reload();}; return; }
-    if(list&&list.length){ f.innerHTML=`<label>Your name · اسمك</label><select id="sel"><option value="">— choose —</option>${list.map(r=>`<option value="${J.esc(r.id)}">${J.esc(r.name)}</option>`).join("")}</select><label style="display:block;margin-top:8px">Last 4 digits of your mobile · آخر 4 أرقام من جوالك</label><input id="pin" inputmode="numeric" maxlength="4"><button class="btn" id="go" style="margin-top:10px">Save</button>`;
-      document.getElementById("go").onclick=async()=>{const id=document.getElementById("sel").value,pin=document.getElementById("pin").value;if(!id)return J.toast("Choose your name");const r=await J.api("login",{traineeId:id,pin});if(!r.ok)return J.toast(r.error||"Not matched");J.setMe({id,name:r.name});location.reload();};
-    } else { f.innerHTML=`<label>Full name · الاسم الكامل</label><input id="nm"><label style="display:block;margin-top:8px">Employee number · الرقم الوظيفي</label><input id="eid" inputmode="numeric"><button class="btn" id="go" style="margin-top:10px">Save</button>`;
-      document.getElementById("go").onclick=()=>{const name=document.getElementById("nm").value.trim(),id=document.getElementById("eid").value.trim();if(!name||!id)return J.toast("Name and number please");J.setMe({id,name});location.reload();};}
-  }
-  draw(u?null:await roster());
-  const st=J.stats(),p=J.progress(),past=J.pastSessions().length;
-  document.getElementById("nums").innerHTML=`<div class="grid g2"><div><div class="big-code" style="font-size:3rem;color:#fff;letter-spacing:0">${st.done}</div>activities done</div><div><div class="big-code" style="font-size:3rem;color:#fff;letter-spacing:0">${st.pct}%</div>average score</div></div><p>Sessions held so far: ${past} of ${J.S.length}</p><div class="meter"><i style="width:${Math.round(100*past/J.S.length)}%"></i></div>`;
+(function(){
+  const J=JISR,u=J.me(),st=J.stats(),p=J.progress(),held=J.pastSessions().length;
+  document.getElementById("hi").textContent=u?`Hi, ${u.name.split(" ")[0]}.`:"My progress.";
+  document.getElementById("sub").innerHTML=u?`${J.esc(u.name)} · ${J.esc(u.id)} <a href="#" id="out" style="font-size:.9rem">· not you?</a>`:`You are signed in automatically the first time you <a href="checkin.html">check in</a>.`;
+  const out=document.getElementById("out"); if(out) out.onclick=e=>{e.preventDefault();J.setMe(null);location.reload();};
+  const tile=(n,l)=>`<div class="card center"><div style="font-size:2.6rem;font-weight:700;letter-spacing:-.03em">${n}</div><div class="muted">${l}</div></div>`;
+  document.getElementById("nums").innerHTML=tile(st.done,"activities done")+tile(st.pct+"%","average score")+tile(`${held}/${J.S.length}`,"sessions held");
   const rows=[];Object.entries(p).forEach(([n,a])=>Object.entries(a).forEach(([k,v])=>rows.push([Number(n),k,v])));rows.sort((a,b)=>b[2].ts-a[2].ts);
-  document.getElementById("log").innerHTML=rows.length?`<table><tr><th>Session</th><th>Activity</th><th>Best score</th><th>When</th></tr>${rows.map(r=>`<tr><td><a href="session.html?n=${r[0]}">S${r[0]}</a></td><td>${J.esc(r[1])}</td><td>${r[2].score}/${r[2].max}</td><td>${new Date(r[2].ts).toLocaleDateString()}</td></tr>`).join("")}</table>`:'<p class="muted">Nothing yet — open today\'s lesson!</p>';
+  document.getElementById("log").innerHTML=rows.length?`<div class="tscroll" style="max-height:none"><table><tr><th>Session</th><th>Activity</th><th>Best</th></tr>${rows.map(r=>`<tr><td><a href="session.html?n=${r[0]}">${r[0]||"Lab"}</a></td><td>${J.esc(r[1].split(":")[1]||r[1])}</td><td>${r[2].score}/${r[2].max}</td></tr>`).join("")}</table></div>`:'<p class="muted">Nothing yet. Open today\'s lesson.</p>';
   const V=document.getElementById("voices");
-  function vv(){const vs=J.voices();if(!vs.length){V.innerHTML='<p class="muted">No English voices found in this browser.</p>';return;}const pref=J.LS.get("voices",{});
-    V.innerHTML=["A","B"].map(sl=>`<label>Voice ${sl==="A"?"1 (narrator)":"2 (partner)"}</label><div class="row" style="margin-bottom:8px"><select data-s="${sl}" style="flex:1">${vs.map(v=>`<option ${pref[sl]===v.name?"selected":""}>${J.esc(v.name)}</option>`).join("")}</select><button class="btn alt sm" data-t="${sl}">▶ Test</button></div>`).join("");
+  function vv(){const vs=J.voices();if(!vs.length){V.innerHTML='<p class="muted">No English voices in this browser.</p>';return;}const pref=J.LS.get("voices",{});
+    V.innerHTML=["A","B"].map(sl=>`<label>${sl==="A"?"Main voice":"Second speaker"}</label><div class="row"><select data-s="${sl}" style="flex:1"><option value="">Automatic (male)</option>${vs.map(v=>`<option ${pref[sl]===v.name?"selected":""}>${J.esc(v.name)}</option>`).join("")}</select><button class="btn alt sm" data-t="${sl}">Test</button></div>`).join("");
     V.querySelectorAll("select").forEach(s=>s.onchange=()=>{const p=J.LS.get("voices",{});p[s.dataset.s]=s.value;J.LS.set("voices",p);});
     V.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>J.speak("Good morning. How can I help you today?",b.dataset.t));}
   vv(); if(window.speechSynthesis) speechSynthesis.addEventListener("voiceschanged",vv);

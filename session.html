@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr · Session</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script><script src="assets/activities.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap">
+  <div id="top"></div>
+  <div class="tabs no-print" id="tabs"></div>
+  <div id="panels"></div>
+</main>
+<footer class="wrap" id="foot"></footer>
+<script>
+(function(){
+  const J=JISR, A=JISR_ACT, n=Number(J.qs("n"))||(J.nextSession()||J.S[0]).n, s=J.sessionByN(n);
+  const top=document.getElementById("top"), tabs=document.getElementById("tabs"), panels=document.getElementById("panels");
+  if(!s){top.innerHTML='<p>Session not found.</p>';return;}
+  document.title="Jisr · Session "+n+" · "+s.themeEn;
+  const prev=J.sessionByN(n-1), next=J.sessionByN(n+1);
+  top.innerHTML=`<div class="row" style="justify-content:space-between"><span class="eyebrow">Week ${s.week} · Session ${n} of ${J.S.length} · ${J.fmtDate(s.date)}</span>
+   <span class="row no-print">${prev?`<a class="btn ghost sm" href="session.html?n=${prev.n}">← ${prev.n}</a>`:""}${next?`<a class="btn ghost sm" href="session.html?n=${next.n}">${next.n} →</a>`:""}</span></div>
+   <h1 id="h1">${J.esc(s.themeEn)}</h1><p class="ar muted" style="margin-top:-6px">${J.esc(s.themeAr)} — ${J.esc(s.typeAr)}</p>`;
+  window.JISR_DATA=function(d){ render(d); };
+  const sc=document.createElement("script"); sc.src="data/sessions/s"+String(n).padStart(2,"0")+".js";
+  sc.onerror=()=>{ top.insertAdjacentHTML("beforeend",`<div class="notice">📌 The materials for this session are being prepared and will appear here before ${J.fmtDate(s.date)}. <span class="ar">ستُنشر مواد هذه الجلسة قبل موعدها.</span></div>`); };
+  document.body.appendChild(sc);
+
+  function render(d){
+    document.getElementById("h1").textContent=d.title||s.themeEn;
+    const P=[]; // [key,labelEn,labelAr,fn]
+    P.push(["start","Start here","ابدأ هنا",el=>{
+      el.innerHTML=`<div class="grid g2"><div class="card"><span class="eyebrow">Today you will · أهداف الجلسة</span><ul class="list">${(d.goals||[]).map(g=>`<li>${J.esc(g)}</li>`).join("")}</ul>
+      ${s.ramadan?'<p class="notice">🌙 Ramadan timing — shorter in-class session; the rest is homework.</p>':""}</div>
+      <div class="card teal"><span class="eyebrow">Warm-up · تمهيد</span><p style="font-size:1.1rem">${J.esc(d.warmup||"")}</p>
+      ${d.grammar?`<span class="eyebrow">Language focus</span><h3 style="color:#fff">${J.esc(d.grammar.title)}</h3><ul class="list">${d.grammar.points.map(p=>`<li>${J.esc(p)}</li>`).join("")}</ul>`:""}</div></div>`;
+      if(d.grammar&&d.grammar.quiz){const c=J.el(`<div class="card act" style="margin-top:14px"><span class="eyebrow">Grammar check</span><h3>🧩 ${J.esc(d.grammar.title)}</h3></div>`);A.quiz(c,d.grammar.quiz,{onScore:(r,m)=>J.saveScore(n,"grammar",r,m)});el.appendChild(c);}
+    }]);
+    if(d.vocab) P.push(["vocab","Vocabulary","المفردات",el=>{const c=J.el('<div class="card act"><span class="eyebrow">Key words · كلمات أساسية</span><h3>🔤 Words for today</h3></div>');A.vocab(c,d.vocab);el.appendChild(c);
+      if(d.vocabQuiz){const q=J.el('<div class="card act"><h3>✔ Vocabulary check</h3></div>');A.quiz(q,d.vocabQuiz,{onScore:(r,m)=>J.saveScore(n,"vocab",r,m)});el.appendChild(q);}}]);
+    if(d.listening) P.push(["listen","Listening","استماع",el=>d.listening.forEach(L=>A.listening(el,L,n))]);
+    if(d.reading) P.push(["read","Reading","قراءة",el=>d.reading.forEach(R=>A.reading(el,R,n))]);
+    if(d.roleplay) P.push(["role","Role-play","تمثيل أدوار",el=>d.roleplay.forEach(R=>A.roleplay(el,R,n))]);
+    if(d.speaking) P.push(["speak","Speaking","محادثة",el=>{ if(d.speaking.readAloud) A.readAloud(el,d.speaking.readAloud,n); (d.speaking.tasks||[]).forEach(t=>A.speakTask(el,t,n)); }]);
+    if(d.writing) P.push(["write","Writing","كتابة",el=>d.writing.forEach(W=>A.writing(el,W,n))]);
+    if(d.homework) P.push(["home","Homework","واجب منزلي",el=>{el.innerHTML=`<div class="card"><span class="eyebrow">Before next session · قبل الجلسة القادمة</span><h3>🏠 Homework</h3><ol class="list">${d.homework.map(h=>`<li>${J.esc(h)}</li>`).join("")}</ol>
+      <p class="muted">Your scores are saved automatically. Check <a href="me.html">My progress</a>.</p></div>`;}]);
+    tabs.innerHTML=""; panels.innerHTML="";
+    P.forEach((p,i)=>{const b=J.el(`<button data-k="${p[0]}">${p[1]} <span class="ar" style="font-weight:400;font-size:.8em">${p[2]}</span></button>`);tabs.appendChild(b);
+      const pn=J.el(`<section class="panel" id="p-${p[0]}"></section>`);panels.appendChild(pn);p[3](pn);
+      b.onclick=()=>{tabs.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));panels.querySelectorAll(".panel").forEach(x=>x.classList.toggle("on",x===pn));J.stopSpeaking();history.replaceState(null,"","#"+p[0]);window.scrollTo({top:0});};});
+    const want=location.hash.slice(1); (tabs.querySelector(`[data-k="${want}"]`)||tabs.firstChild).click();
+    window.addEventListener("hashchange",()=>{const b=tabs.querySelector(`[data-k="${location.hash.slice(1)}"]`);if(b&&!b.classList.contains("on"))b.click();});
+  }
+  document.getElementById("foot").innerHTML=`${J.esc(J.C.partnersEn)} · <span class="ar">${J.esc(J.C.partnersAr)}</span> · Instructor: ${J.esc(J.C.instructor)}`;
+})();
+</script></body></html>

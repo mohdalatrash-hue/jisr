@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr · English for Municipal Professionals</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/ready.js"></script><script src="assets/core.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="card" style="display:flex;flex-direction:column;justify-content:center">
+      <span class="eyebrow" id="partners"></span>
+      <h1>Build your bridge<br>to working English.</h1>
+      <p class="ar" style="font-size:1.25rem;margin:0">جسرك إلى الإنجليزية في بيئة العمل</p>
+      <p class="muted" id="tagline"></p>
+      <div class="row"><a class="btn clay" href="checkin.html">✅ I'm in class today · <span class="ar">سجّل حضورك</span></a><a class="btn alt" href="schedule.html">See all 64 sessions</a></div>
+    </div>
+    <div class="card teal" id="today"></div>
+  </section>
+
+  <section class="grid g4" style="margin-bottom:22px">
+    <a class="tile" href="checkin.html"><div class="ico">✅</div><b>Daily check-in</b><div class="ar muted">تسجيل الحضور اليومي</div></a>
+    <a class="tile" id="t-session" href="session.html"><div class="ico">📘</div><b>Today's lesson</b><div class="ar muted">درس اليوم</div></a>
+    <a class="tile" href="speak.html"><div class="ico">🎙</div><b>Speaking Lab</b><div class="ar muted">مختبر المحادثة والنطق</div></a>
+    <a class="tile" href="me.html"><div class="ico">📈</div><b>My progress</b><div class="ar muted">تقدّمي ونقاطي</div></a>
+  </section>
+
+  <section class="grid g2" style="margin-bottom:22px">
+    <div class="card">
+      <span class="eyebrow">How each week works · نظام الأسبوع</span>
+      <h2>Three sessions, four skills</h2>
+      <div class="grid" style="gap:10px">
+        <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><span class="chip">Sun</span><div><b>Listen &amp; Read</b> — dialogues with real workplace language, comprehension, T/F, gap-fill. <span class="ar muted">استماع وقراءة</span></div></div>
+        <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><span class="chip">Mon</span><div><b>Speak &amp; Role-play</b> — airport, restaurant, service counter, phone; speak to the screen and get instant feedback. <span class="ar muted">محادثة وتمثيل أدوار</span></div></div>
+        <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><span class="chip">Tue</span><div><b>Write &amp; Review</b> — emails, notes, short reports, plus a weekly review quiz. <span class="ar muted">كتابة ومراجعة</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="eyebrow">10 minutes a day · ١٠ دقائق يوميًا</span>
+      <h2>Today's challenge</h2>
+      <div id="challenge"></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom:22px">
+    <span class="eyebrow">The journey · مسار البرنامج</span>
+    <h2>22 weeks, from first greetings to a final presentation</h2>
+    <div id="journey" class="grid g3" style="gap:8px"></div>
+  </section>
+</main>
+<footer class="wrap" id="foot"></footer>
+<script>
+(function(){
+  const J=JISR, t=J.todayISO(), s=J.sessionByDate(t), nx=J.nextSession(t), R=window.JISR_READY||[];
+  document.getElementById("partners").textContent=J.C.partnersEn;
+  document.getElementById("tagline").innerHTML=`${J.esc(J.C.taglineEn)} · <span class="ar">${J.esc(J.C.taglineAr)}</span>`;
+  const T=document.getElementById("today");
+  if(s){T.innerHTML=`<span class="eyebrow">Today · اليوم</span><h2 style="color:#fff">Session ${s.n}: ${J.esc(s.themeEn)}</h2><p>${s.typeEn} · <span class="ar">${s.typeAr}</span></p><div class="row"><a class="btn clay" href="checkin.html">Check in</a><a class="btn alt" href="session.html?n=${s.n}">Open the lesson →</a></div>`;}
+  else if(nx){T.innerHTML=`<span class="eyebrow">Next session · الجلسة القادمة</span><h2 style="color:#fff">${J.fmtDate(nx.date)} — ${J.esc(nx.themeEn)}</h2><p class="ar">${J.fmtDate(nx.date,"ar")} · ${J.esc(nx.themeAr)}</p><p>Session ${nx.n} · ${nx.typeEn}</p><a class="btn alt" href="session.html?n=${nx.n}">Preview →</a>`;}
+  else T.innerHTML=`<span class="eyebrow">Programme complete</span><h2 style="color:#fff">Congratulations, graduates! 🎓</h2>`;
+  const cur=s||nx; if(cur) document.getElementById("t-session").href="session.html?n="+cur.n;
+  // daily challenge from released sessions (rotates each day)
+  const C=document.getElementById("challenge"), ready=R.filter(n=>{const x=J.sessionByN(n);return x&&x.date<=(nx?nx.date:t);});
+  if(!ready.length){C.innerHTML='<p class="muted">Challenges start with Session 1.</p>';}
+  else{ const day=Math.floor(Date.now()/864e5), pick=ready[day%ready.length], kinds=[["#vocab","🔤 Review 10 words and test yourself with the Arabic hidden"],["#speak","🗣 Read 5 sentences aloud and beat your best score"],["#listen","🎧 Listen to one dialogue twice — answer without the transcript"],["#role","🎭 Do the role-play once with your voice, not the keyboard"]], k=kinds[day%kinds.length];
+    C.innerHTML=`<p style="font-size:1.1rem">${k[1]}.</p><p class="muted">From Session ${pick}: ${J.esc(J.sessionByN(pick).themeEn)}</p><a class="btn" href="session.html?n=${pick}${k[0]}">Start the challenge</a>
+    <p class="muted" style="margin-top:10px">Your points so far: <b>${J.stats().pts}</b> · activities completed: <b>${J.stats().done}</b></p>`;}
+  // journey
+  const weeks={}; J.S.forEach(x=>{(weeks[x.week]=weeks[x.week]||[]).push(x);});
+  document.getElementById("journey").innerHTML=Object.values(weeks).map(w=>{const a=w[0],now=w.some(x=>x.date>=t)&&w[0].date<=t;return `<a class="tile" href="session.html?n=${a.n}" style="padding:10px 12px${now?";border-color:var(--clay)":""}"><small>Week ${a.week} · ${J.fmtDate(a.date)}</small><div><b>${J.esc(a.themeEn)}</b></div><div class="ar muted" style="font-size:.85rem">${J.esc(a.themeAr)}</div></a>`;}).join("");
+  document.getElementById("foot").innerHTML=`${J.esc(J.C.partnersEn)} · <span class="ar">${J.esc(J.C.partnersAr)}</span> · Instructor: ${J.esc(J.C.instructor)}`;
+})();
+</script></body></html>

@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr · Schedule</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/ready.js"></script><script src="assets/core.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap">
+  <span class="eyebrow">Programme calendar · الجدول الزمني</span>
+  <h1>64 sessions · Sun · Mon · Tue</h1>
+  <p class="muted" id="sum"></p>
+  <div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" onclick="print()">🖨 Print schedule</button></div>
+  <div class="cal" id="cal"></div>
+  <h3 style="margin-top:24px">No sessions on these days · أيام بدون جلسات</h3>
+  <div id="breaks" class="muted"></div>
+</main>
+<script>
+(function(){
+  const J=JISR,t=J.todayISO(),R=window.JISR_READY||[],W={};
+  J.S.forEach(s=>(W[s.week]=W[s.week]||[]).push(s));
+  document.getElementById("sum").innerHTML=`${J.fmtDate(J.S[0].date)} ${J.S[0].date.slice(0,4)} → ${J.fmtDate(J.S.at(-1).date)} ${J.S.at(-1).date.slice(0,4)} · university breaks excluded · <span class="ar">مع استثناء الإجازات الجامعية</span>`;
+  document.getElementById("cal").innerHTML=Object.values(W).map(w=>`<div class="wk"><div><b>Week ${w[0].week}</b><div>${J.esc(w[0].themeEn)}</div><div class="ar muted">${J.esc(w[0].themeAr)}</div></div>
+   <div class="sess">${w.map(s=>`<a href="session.html?n=${s.n}" class="${s.date===t?"today":""} ${s.date<t?"past":""} ${R.includes(s.n)?"ready":""}"><b>${J.fmtDate(s.date)}</b><span>S${s.n} · ${s.typeEn}</span>${s.ramadan?"<small>🌙 Ramadan</small>":""}</a>`).join("")}</div></div>`).join("");
+  const B={};(window.JISR_BREAKS||[]).forEach(b=>(B[b.reason]=B[b.reason]||[]).push(J.fmtDate(b.date)));
+  document.getElementById("breaks").innerHTML=Object.entries(B).map(([k,v])=>`<p><b>${k}:</b> ${v.join(", ")}</p>`).join("");
+})();
+</script></body></html>

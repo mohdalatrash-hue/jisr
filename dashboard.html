@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Jisr · Instructor</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap">
+  <div class="only-print" id="phead"></div>
+  <div id="gate" class="card no-print" style="max-width:460px">
+    <span class="eyebrow">Instructor only</span><h2>Attendance &amp; reports</h2>
+    <label>Admin key</label><input id="key" type="password" autocomplete="current-password"><button class="btn" id="enter" style="margin-top:10px">Open</button>
+    <p class="muted" id="gmsg"></p>
+  </div>
+  <div id="app" style="display:none">
+    <div class="tabs no-print" id="tabs">
+      <button data-k="today" class="on">Today / code</button><button data-k="day">Daily report</button><button data-k="week">Weekly report</button><button data-k="all">Full register</button><button data-k="work">Activity &amp; scores</button>
+    </div>
+    <section class="panel on" id="p-today"></section>
+    <section class="panel" id="p-day"></section>
+    <section class="panel" id="p-week"></section>
+    <section class="panel" id="p-all"></section>
+    <section class="panel" id="p-work"></section>
+  </div>
+</main>
+<script>
+(function(){
+  const J=JISR,$=id=>document.getElementById(id),today=J.todayISO();
+  let D=null,key=sessionStorage.getItem("jisr.key")||"";
+  const held=()=>J.S.filter(s=>s.date<=today);
+  const ST={P:"Present",A:"Absent",L:"Late",E:"Excused","–":"Pending"};
+
+  function demoData(){ // preview data when backend is not connected
+    const names=["Abdullah Alharbi","Faisal Alotaibi","Nouf Alqahtani","Saad Aldosari","Reem Alshammari","Turki Alenezi","Hessa Almutairi","Majed Alrashidi"];
+    const roster=names.map((n,i)=>({id:String(1001+i),name:n,dept:["Parks","Licensing","Planning","Waste","Customer Service"][i%5]}));
+    const att=[];const hs=J.S.slice(0,Math.max(6,held().length));
+    hs.forEach(s=>roster.forEach((r,i)=>{const x=(i*7+s.n*3)%10;if(x<8)att.push({date:s.date,session:s.n,traineeId:r.id,name:r.name,status:x===7?"L":"P",time:s.date+"T09:0"+(x%6)+":00",device:"d"+r.id,method:"code"});}));
+    return {ok:true,demo:true,roster,attendance:att,scores:roster.map((r,i)=>({traineeId:r.id,activities:12+i*3,avg:55+i*5,ai:i*2})),code:"4826",codeDate:today};
+  }
+  async function load(){
+    const r=J.online?await J.api("admin",{key,op:"overview"}):demoData();
+    if(!r.ok){$("gmsg").textContent="⚠ "+(r.error||"Failed");$("gate").style.display="block";$("app").style.display="none";return false;}
+    D=r;sessionStorage.setItem("jisr.key",key);$("gate").style.display="none";$("app").style.display="block";
+    if(r.demo&&!$("demo"))$("app").insertAdjacentHTML("afterbegin",'<p class="notice no-print" id="demo">Preview with sample data — connect the backend (config.js → apiUrl) to see real attendance.</p>');
+    drawAll();return true;
+  }
+  // status for trainee on a date: latest row wins; none → Absent (or Pending for today)
+  function status(id,date){const rows=D.attendance.filter(a=>a.traineeId==id&&a.date===date);if(!rows.length)return date<today?"A":"–";return rows[rows.length-1].status;}
+  function shared(date){const m={},f=new Set();D.attendance.filter(a=>a.date===date&&a.method==="code").forEach(a=>{(m[a.device]=m[a.device]||new Set()).add(a.traineeId);});Object.values(m).forEach(s=>{if(s.size>1)s.forEach(x=>f.add(String(x)));});return f;}
+  function csv(rows,name){const t=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+t],{type:"text/csv"}));a.download=name;a.click();}
+  function head(title){$("phead").innerHTML=`<h2>${J.esc(J.C.programEn)} (${J.esc(J.C.programAr)}) — ${J.esc(title)}</h2><p>${J.esc(J.C.partnersEn)} · Instructor: ${J.esc(J.C.instructor)} · Printed ${new Date().toLocaleString("en-GB")}</p>`;}
+  const tools=(id)=>`<div class="row no-print" style="margin:10px 0"><button class="btn sm" data-csv="${id}">⬇ Export CSV (Excel)</button><button class="btn ghost sm" data-print="${id}">🖨 Print / PDF</button></div>`;
+
+  function dayTable(date){
+    const s=J.sessionByDate(date),sh=shared(date);
+    const rows=D.roster.map(r=>{const st=status(r.id,date),a=D.attendance.filter(x=>x.traineeId==r.id&&x.date===date).pop();return [r.id,r.name,r.dept||"",st,a&&a.time?a.time.slice(11,16):"",a?a.method:"",sh.has(String(r.id))?"⚠ shared device":""];});
+    const c=k=>rows.filter(r=>r[3]===k).length;
+    return {s,rows,html:`<p><b>Session ${s?s.n:"?"}</b> · ${J.fmtDate(date)} ${date.slice(0,4)} · ${s?J.esc(s.themeEn):""} — <b>${c("P")+c("L")}</b> present (${c("L")} late), <b>${c("A")}</b> absent, ${c("E")} excused, of ${rows.length}</p>
+      <div class="tscroll"><table><tr><th>ID</th><th>Name</th><th>Dept</th><th>Status</th><th>Time</th><th>Method</th><th>Flag</th></tr>${rows.map(r=>`<tr><td>${J.esc(r[0])}</td><td>${J.esc(r[1])}</td><td>${J.esc(r[2])}</td><td class="${r[3]==="–"?"":r[3]}"><a href="#" data-mark="${J.esc(r[0])}|${date}" title="Click to change" style="color:inherit">${ST[r[3]]}</a></td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td></tr>`).join("")}</table></div>`};
+  }
+  function bindMarks(root){root.querySelectorAll("[data-mark]").forEach(a=>a.onclick=async e=>{e.preventDefault();const [id,date]=a.dataset.mark.split("|");const cur=status(id,date),nx={P:"A",A:"E",E:"L",L:"P","–":"P"}[cur];
+    if(!confirm(`Mark ${id} as ${ST[nx]} on ${date}?`))return;
+    if(J.online){const r=await J.api("admin",{key,op:"mark",traineeId:id,date,session:(J.sessionByDate(date)||{}).n,status:nx});if(!r.ok)return J.toast(r.error);}
+    D.attendance.push({date,traineeId:id,status:nx,method:"manual",time:new Date().toISOString(),device:"instructor"});drawAll();});}
+
+  function drawToday(){
+    const s=J.sessionByDate(today),el=$("p-today");
+    if(!s){const nx=J.nextSession();el.innerHTML=`<div class="card"><p>No session today. Next: <b>${nx?J.fmtDate(nx.date)+" — Session "+nx.n:"—"}</b></p></div>`;return;}
+    const t=dayTable(today);
+    el.innerHTML=`<div class="grid g2"><div class="card teal"><span class="eyebrow">Show this on the projector</span><p style="margin:0">Check-in code for Session ${s.n}</p><div class="big-code" style="color:#fff">${J.esc(D.code||"----")}</div><p class="muted">Trainees open the site → <b>Check in</b> → enter the code.</p></div>
+      <div class="card"><h3>Live: ${t.rows.filter(r=>r[3]==="P"||r[3]==="L").length} / ${t.rows.length} checked in</h3><button class="btn alt sm no-print" id="rf">↻ Refresh</button><p class="muted">Late threshold and check-in window are set in the backend.</p></div></div><div class="card" style="margin-top:14px">${t.html}${tools("today")}</div>`;
+    $("rf").onclick=load;bindMarks(el);
+  }
+  function drawDay(){
+    const el=$("p-day"),hs=held(),sel=el.dataset.d||(hs.length?hs.at(-1).date:J.S[0].date);
+    const t=dayTable(sel);
+    el.innerHTML=`<div class="card"><div class="row no-print"><label>Session date</label><select id="dsel" style="width:auto">${J.S.map(s=>`<option value="${s.date}" ${s.date===sel?"selected":""}>S${s.n} · ${J.fmtDate(s.date)} ${s.date.slice(0,4)}</option>`).join("")}</select></div>${t.html}${tools("day")}</div>`;
+    $("dsel").onchange=e=>{el.dataset.d=e.target.value;drawDay();};bindMarks(el);
+  }
+  function matrix(sessions){
+    const rows=D.roster.map(r=>{const st=sessions.map(s=>status(r.id,s.date));const att=st.filter(x=>x==="P"||x==="L").length,cnt=st.filter(x=>x!=="–"&&x!=="E").length;return {r,st,att,abs:st.filter(x=>x==="A").length,pct:cnt?Math.round(100*att/cnt):0};});
+    const html=`<div class="tscroll"><table><tr><th>ID</th><th>Name</th>${sessions.map(s=>`<th title="${J.esc(s.themeEn)}">S${s.n}<br><small>${J.fmtDate(s.date)}</small></th>`).join("")}<th>Present</th><th>Absent</th><th>%</th></tr>
+      ${rows.map(x=>`<tr><td>${J.esc(x.r.id)}</td><td>${J.esc(x.r.name)}</td>${x.st.map(v=>`<td class="${v}">${v}</td>`).join("")}<td>${x.att}</td><td>${x.abs}</td><td style="${x.pct<75?"color:var(--bad);font-weight:700":""}">${x.pct}%</td></tr>`).join("")}</table></div><p class="muted">P present · L late (counts as present) · A absent · E excused (not counted) · – not held yet. Red = below 75%.</p>`;
+    const csvRows=[["ID","Name",...sessions.map(s=>`S${s.n} ${s.date}`),"Present","Absent","%"],...rows.map(x=>[x.r.id,x.r.name,...x.st,x.att,x.abs,x.pct])];
+    return {html,csvRows};
+  }
+  function drawWeek(){
+    const el=$("p-week"),weeks=[...new Set(J.S.map(s=>s.week))],cur=(J.sessionByDate(today)||held().at(-1)||J.S[0]).week,w=Number(el.dataset.w||cur);
+    const ss=J.S.filter(s=>s.week===w),m=matrix(ss);el._csv=m.csvRows;el._name=`jisr-week${w}-attendance.csv`;
+    el.innerHTML=`<div class="card"><div class="row no-print"><label>Week</label><select id="wsel" style="width:auto">${weeks.map(x=>{const a=J.S.find(s=>s.week===x);return `<option value="${x}" ${x===w?"selected":""}>Week ${x} · ${J.fmtDate(a.date)} · ${J.esc(a.themeEn)}</option>`;}).join("")}</select></div><h3>Week ${w}: ${J.esc(ss[0].themeEn)}</h3>${m.html}${tools("week")}</div>`;
+    $("wsel").onchange=e=>{el.dataset.w=e.target.value;drawWeek();};
+  }
+  function drawAll(){
+    const el=$("p-all"),ss=held().length?held():J.S.slice(0,3),m=matrix(ss);el._csv=m.csvRows;el._name="jisr-full-register.csv";
+    el.innerHTML=`<div class="card"><h3>Full register — ${ss.length} session(s) held</h3>${m.html}${tools("all")}</div>`;
+    const w=$("p-work"),sc=D.scores||[];
+    w.innerHTML=`<div class="card"><h3>Platform activity (homework engagement)</h3><div class="tscroll"><table><tr><th>ID</th><th>Name</th><th>Activities done</th><th>Average score</th><th>AI feedback uses</th></tr>${D.roster.map(r=>{const x=sc.find(s=>s.traineeId==r.id)||{};return `<tr><td>${J.esc(r.id)}</td><td>${J.esc(r.name)}</td><td>${x.activities||0}</td><td>${x.avg!=null?x.avg+"%":"—"}</td><td>${x.ai||0}</td></tr>`;}).join("")}</table></div>${tools("work")}</div>`;
+    w._csv=[["ID","Name","Activities","Average %","AI uses"],...D.roster.map(r=>{const x=sc.find(s=>s.traineeId==r.id)||{};return [r.id,r.name,x.activities||0,x.avg||"",x.ai||0];})];w._name="jisr-activity.csv";
+    drawToday();drawDay();drawWeek();
+    document.querySelectorAll("[data-csv]").forEach(b=>b.onclick=()=>{const id=b.dataset.csv,p=$("p-"+id);
+      if(id==="today"||id==="day"){const d=id==="today"?today:($("dsel")||{}).value;const t=dayTable(d);csv([["ID","Name","Dept","Status","Time","Method","Flag"],...t.rows.map(r=>[...r.slice(0,3),ST[r[3]],...r.slice(4)])],`jisr-${d}-attendance.csv`);}
+      else csv(p._csv,p._name);});
+    document.querySelectorAll("[data-print]").forEach(b=>b.onclick=()=>{const id=b.dataset.print;head({today:"Daily attendance",day:"Daily attendance",week:"Weekly attendance",all:"Attendance register",work:"Platform activity"}[id]);
+      document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+id));print();});
+  }
+  document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.k));});
+  $("enter").onclick=()=>{key=$("key").value.trim();load();};
+  if(key||!J.online) load();
+})();
+</script></body></html>

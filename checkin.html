@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr · Check in</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap" style="max-width:560px">
+  <div class="card">
+    <span class="eyebrow">Daily attendance · الحضور اليومي</span>
+    <h1>Check in</h1>
+    <div id="box"></div>
+  </div>
+  <p class="muted" style="font-size:.85rem;margin-top:12px">Enter the 4-digit code shown on the classroom screen. One check-in per person per session; your device is recorded. <span class="ar">أدخل الرمز المكوّن من 4 أرقام المعروض في القاعة. يُسجَّل حضورك مرة واحدة لكل جلسة.</span></p>
+</main>
+<script>
+(function(){
+  const J=JISR,B=document.getElementById("box"),t=J.todayISO(),s=J.sessionByDate(t),u=J.me();
+  if(!u){B.innerHTML=`<p>First, tell us who you are. <span class="ar">سجّل اسمك أولًا.</span></p><a class="btn" href="me.html">Sign in · تسجيل الاسم</a>`;return;}
+  if(!s){const nx=J.nextSession(t);B.innerHTML=`<p>No session today. <span class="ar">لا توجد جلسة اليوم.</span></p>${nx?`<p>Next: <b>${J.fmtDate(nx.date)}</b> — ${J.esc(nx.themeEn)}</p>`:""}`;return;}
+  const done=J.LS.get("checkins",{});
+  if(done[t]){B.innerHTML=`<p style="font-size:1.3rem">✅ You are checked in for Session ${s.n}, ${J.esc(u.name)}.</p><p class="muted">${new Date(done[t]).toLocaleTimeString()}</p><a class="btn alt" href="session.html?n=${s.n}">Open today's lesson →</a>`;return;}
+  B.innerHTML=`<p><b>${J.esc(u.name)}</b> · Session ${s.n} · ${J.fmtDate(t)}</p><label>Class code · رمز الحضور</label>
+   <input id="code" inputmode="numeric" maxlength="4" autocomplete="one-time-code" style="font:700 2rem Fraunces,serif;letter-spacing:.4em;text-align:center">
+   <button class="btn clay" id="go" style="margin-top:12px;width:100%;justify-content:center">I'm present · حاضر</button><p id="msg" class="muted"></p>`;
+  document.getElementById("go").onclick=async()=>{
+    const code=document.getElementById("code").value.trim(); if(!/^\d{4}$/.test(code)) return J.toast("4 digits please");
+    const b=document.getElementById("go"); b.disabled=true; b.textContent="…";
+    let r=await J.api("checkin",{traineeId:u.id,name:u.name,date:t,session:s.n,code});
+    if(r.demo) r={ok:true,status:"P",demo:true};
+    if(r.ok){done[t]=Date.now();J.LS.set("checkins",done);B.innerHTML=`<p style="font-size:1.3rem">✅ Present${r.status==="L"?" (late)":""} — welcome, ${J.esc(u.name)}!</p>${r.demo?'<p class="notice">Demo mode: saved on this device only.</p>':""}<a class="btn alt" href="session.html?n=${s.n}">Open today's lesson →</a>`;}
+    else{b.disabled=false;b.textContent="I'm present · حاضر";document.getElementById("msg").textContent="⚠ "+(r.error||"Try again");}
+  };
+})();
+</script></body></html>

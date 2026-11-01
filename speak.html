@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr · Speaking Lab</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/speaklab.js"></script><script src="assets/core.js"></script><script src="assets/activities.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap">
+  <span class="eyebrow">Speaking Lab · مختبر المحادثة</span>
+  <h1>Speak. Hear yourself. Improve.</h1>
+  <p class="muted">Practise any time, at work or at home. Use Chrome, Edge or Safari and allow the microphone. <span class="ar">تدرّب في أي وقت. استخدم متصفح كروم أو سفاري واسمح باستخدام الميكروفون.</span></p>
+  <div id="mic" class="notice" style="display:none"></div>
+  <div class="tabs no-print" id="tabs">
+    <button data-k="talk" class="on">🤖 Talk with AI <span class="ar">محادثة</span></button>
+    <button data-k="free">🎙 Speak on a topic <span class="ar">تحدّث</span></button>
+    <button data-k="drill">🗣 Pronunciation drills <span class="ar">النطق</span></button>
+  </div>
+  <section class="panel on" id="p-talk"><div class="grid g4" id="scen" style="margin-bottom:14px"></div><div id="chatbox"></div></section>
+  <section class="panel" id="p-free"><div id="free"></div></section>
+  <section class="panel" id="p-drill"><div id="drill"></div></section>
+</main>
+<script>
+(function(){
+  const J=JISR,A=JISR_ACT,L=window.JISR_LAB;
+  if(!J.canListen()){const m=document.getElementById("mic");m.style.display="block";m.innerHTML="Speech recognition isn't available in this browser. Open the site in <b>Chrome</b> (Android/PC) or <b>Safari</b> (iPhone). You can still type.";}
+  document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.k));J.stopSpeaking();});
+  const sc=document.getElementById("scen"),cb=document.getElementById("chatbox");
+  L.scenarios.forEach(s=>{const t=J.el(`<a class="tile" href="#" style="padding:12px"><div class="ico">${s.icon}</div><b>${J.esc(s.en)}</b><div class="ar muted">${J.esc(s.ar)}</div></a>`);
+    t.onclick=e=>{e.preventDefault();sc.querySelectorAll(".tile").forEach(x=>x.style.borderColor="");t.style.borderColor="var(--clay)";cb.innerHTML=`<div class="card"><h3>${s.icon} ${J.esc(s.en)}</h3></div>`;A.aiPartner(cb.firstChild,{scenario:s.scenario,title:s.en,n:0});cb.querySelector("details").open=true;};sc.appendChild(t);});
+  const day=Math.floor(Date.now()/864e5),fr=document.getElementById("free");
+  L.prompts.forEach((p,i)=>{ if(i<3) A.speakTask(fr,L.prompts[(day+i)%L.prompts.length],0); });
+  fr.insertAdjacentHTML("beforeend",'<p class="muted">New topics appear every day. · مواضيع جديدة يوميًا</p>');
+  A.readAloud(document.getElementById("drill"),[0,1,2,3,4,5].map(i=>L.drills[(day+i)%L.drills.length]),0);
+})();
+</script></body></html>

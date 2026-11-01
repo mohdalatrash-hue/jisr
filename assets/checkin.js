@@ -4,7 +4,19 @@
   function mount(B, opts) {
     opts = opts || {};
     const t = J.todayISO(), s = J.sessionByDate(t);
-    if (!s) { B.innerHTML = opts.compact ? "" : `<p class="center" style="font-size:1.15rem">No session today.<br><span class="ar muted">لا توجد جلسة اليوم</span></p>`; return; }
+    if (!s) { // no class today: show when check-in opens, and let a new trainee save his name in advance
+      const nx = J.nextSession(t), u0 = J.me();
+      B.innerHTML = `<p style="margin:0"><b>No class today.</b> <span class="ar muted">لا توجد جلسة اليوم</span></p>
+        ${nx ? `<p class="muted" style="margin:4px 0 0">Check-in opens <b>${J.fmtDate(nx.date)}, 3:00–7:30 pm</b> · <span class="ar">يفتح التسجيل يوم الحصة</span></p>` : ""}
+        ${u0 ? `<p style="margin:12px 0 0">✓ Ready: <b>${J.esc(u0.name)}</b> <a href="#" data-chg class="muted" style="font-size:.85rem">· not you?</a><br><span class="muted" style="font-size:.88rem">On class day you will only type the code.</span></p>`
+             : `<p class="muted" style="margin:12px 0 0;font-size:.92rem">Save your name now, so on class day you only type the code.</p>
+                <label>Your name <span class="ar muted">اسمك</span></label><input data-nm autocomplete="name"><label>Employee number <span class="ar muted">الرقم الوظيفي</span></label><input data-eid inputmode="numeric">
+                <button class="btn" data-save style="width:100%;margin-top:14px">Save my name · حفظ</button><p data-msg class="center" style="color:var(--bad);margin:8px 0 0"></p>`}`;
+      const c0 = B.querySelector("[data-chg]"); if (c0) c0.onclick = e => { e.preventDefault(); J.setMe(null); location.reload(); };
+      const sv = B.querySelector("[data-save]");
+      if (sv) sv.onclick = () => { const name = B.querySelector("[data-nm]").value.trim(), id = B.querySelector("[data-eid]").value.trim();
+        if (!name || !id) return B.querySelector("[data-msg]").textContent = "Write your name and number."; J.setMe({ id, name }); location.reload(); };
+      return; }
     const done = J.LS.get("checkins", {});
     const success = (name, demo) => {
       B.innerHTML = `<div class="row" style="justify-content:center;gap:12px"><span style="font-size:2rem;line-height:1">✓</span><div><b>You're checked in, ${J.esc(name.split(" ")[0])}.</b><div class="muted" style="font-size:.9rem">Session ${s.n} · ${J.fmtDate(t)}</div></div></div>${demo ? '<p class="notice center">Demo mode: saved on this phone only.</p>' : ""}`;

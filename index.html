@@ -24,8 +24,8 @@
     if(!ready) return `<p class="muted">The materials for this lesson will appear here before ${J.fmtDate(x.date)}.</p>`;
     return `<p style="margin:0 0 4px"><b>Lesson ${x.n}: ${J.esc(x.themeEn)}</b> <span class="muted">· ${x.typeEn}</span></p><div class="meter" style="background:var(--paper);margin:8px 0 6px"><i style="width:${pct}%"></i></div><p class="muted" style="font-size:.88rem;margin:0 0 14px">${d} of ${tot} steps done</p>
       <a class="btn big" href="session.html?n=${x.n}">${d===0?"Start the lesson":d>=tot?"Review the lesson":"Continue the lesson"} →</a>`;};
+  const c=step("Check in","سجّل حضورك"); JISR_CHECKIN.mount(c,{});
   if(s){
-    const c=step("Check in","سجّل حضورك"); JISR_CHECKIN.mount(c,{});
     step("Today's lesson","درس اليوم",lessonCard(s));
   } else {
     // continue the most recent unfinished lesson (or preview the next one)

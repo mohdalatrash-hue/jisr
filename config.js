@@ -3,7 +3,7 @@
 // Leave it empty to run the site in "demo mode" (everything works, but attendance
 // and scores stay on each device and AI feedback is replaced by built-in checks).
 window.JISR_CONFIG = {
-  apiUrl: "",
+  apiUrl: "https://script.google.com/macros/s/AKfycbxKdY6YsezJ6SMOZyIfkW0La6g3d33Zgf_g9nyndEJfr8T5J0HHRDsKTvlel_PTjkhD/exec",
   programEn: "Jisr",
   programAr: "جسر",
   taglineEn: "English for Municipal Professionals",

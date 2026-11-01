@@ -11,14 +11,12 @@
   const J=JISR,B=document.getElementById("box"),t=J.todayISO(),s=J.sessionByDate(t);
   if(!s){const nx=J.nextSession(t);B.innerHTML=`<p class="center" style="font-size:1.15rem">No session today.<br><span class="ar muted">لا توجد جلسة اليوم</span></p>${nx?`<p class="center muted">Next: ${J.fmtDate(nx.date)}</p>`:""}`;return;}
   const done=J.LS.get("checkins",{});
-  const success=(name,st,demo)=>{B.innerHTML=`<p class="center" style="font-size:3rem;margin:0">✓</p><h2 class="center">You're in, ${J.esc(name.split(" ")[0])}.</h2><p class="center muted">${st==="L"?"Recorded as late · ":""}Session ${s.n}</p>${demo?'<p class="notice center">Demo mode: saved on this phone only.</p>':""}<p class="center" style="margin-top:18px"><a class="btn" href="session.html?n=${s.n}">Open today's lesson</a></p>`;};
+  const success=(name,st,demo)=>{B.innerHTML=`<p class="center" style="font-size:3rem;margin:0">✓</p><h2 class="center">You're in, ${J.esc(name.split(" ")[0])}.</h2><p class="center muted">Session ${s.n}</p>${demo?'<p class="notice center">Demo mode: saved on this phone only.</p>':""}<p class="center" style="margin-top:18px"><a class="btn" href="session.html?n=${s.n}">Open today's lesson</a></p>`;};
   let u=J.me();
   if(done[t]&&u) return success(u.name,"P");
   let who="";
   if(!u){
-    let roster=null; if(J.online){const r=await J.api("roster");if(r.ok)roster=r.roster;}
-    who=roster?`<label>Your name <span class="ar muted">اسمك</span></label><select id="who"><option value="">Choose…</option>${roster.map(r=>`<option value="${J.esc(r.id)}">${J.esc(r.name)}</option>`).join("")}</select>`
-              :`<label>Your name <span class="ar muted">اسمك</span></label><input id="nm" autocomplete="name"><label>Employee number <span class="ar muted">الرقم الوظيفي</span></label><input id="eid" inputmode="numeric">`;
+    who=`<label>Your name <span class="ar muted">اسمك</span></label><input id="nm" autocomplete="name"><label>Employee number <span class="ar muted">الرقم الوظيفي</span></label><input id="eid" inputmode="numeric">`;
   } else who=`<p class="center" style="margin:0 0 6px">${J.esc(u.name)} <a href="#" id="chg" class="muted" style="font-size:.85rem">· not you?</a></p>`;
   B.innerHTML=`${who}<label>Code on the screen <span class="ar muted">الرمز المعروض</span></label>
     <input id="code" inputmode="numeric" maxlength="4" autocomplete="one-time-code" style="font-size:2.2rem;font-weight:700;letter-spacing:.4em;text-align:center">

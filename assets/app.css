@@ -147,3 +147,9 @@ footer{padding:22px 0 30px;color:var(--muted);font-size:.78rem;border-top:1px so
   th{position:static}
 }
 .band .tile,.act .tile{background:var(--paper)}
+
+.tabs button .tick{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--paper);font-size:.72rem;font-weight:600;margin-right:2px}
+.tabs button.done .tick{background:var(--ok);color:#fff}
+.tabs button.on .tick{background:var(--blue);color:#fff}
+.stepnav{justify-content:space-between;margin:22px 0 8px;padding-top:18px;border-top:1px solid var(--line)}
+.num{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-weight:700}

@@ -160,17 +160,26 @@
   }
   function qs(k) { return new URLSearchParams(location.search).get(k); }
 
+  /* ---------- lesson steps (what a trainee has finished) ---------- */
+  const STEP_KEYS = { vocab: ["vocab"], listen: ["listening:"], read: ["reading:"], role: ["roleplay:"], speak: ["read-aloud", "speaking:"], write: ["writing:"], more: ["open:"], start: ["grammar"] };
+  function stepsDone(n) {
+    const d = new Set(LS.get("steps." + n, [])), p = (LS.get("progress", {})[n]) || {};
+    Object.entries(STEP_KEYS).forEach(([k, pre]) => { if (Object.keys(p).some(a => pre.some(x => a.startsWith(x)))) d.add(k); });
+    return d;
+  }
+  function markStep(n, k) { const d = new Set(LS.get("steps." + n, [])); d.add(k); LS.set("steps." + n, [...d]); }
   window.JISR = { C, S, LS, online, api, todayISO, fmtDate, sessionByDate, sessionByN, nextSession, pastSessions, me, setMe, deviceId,
     progress, saveScore, stats, speak, stopSpeaking, rate, voices: () => voices.filter(v => /^en[-_]/i.test(v.lang)), canListen, listen,
-    startRecording, esc, norm, words, wordDiff, el, toast, qs };
+    startRecording, esc, norm, words, wordDiff, el, toast, qs, stepsDone, markStep };
 })();
 
 /* ---------- shared header + identity strip ---------- */
 document.addEventListener("DOMContentLoaded", () => {
   const J = window.JISR, h = document.getElementById("site-header");
   if (h) {
-    const here = location.pathname.split("/").pop() || "index.html";
-    const nav = [["checkin.html", "Check in"], ["schedule.html", "Lessons"], ["resources.html", "Practice"], ["speak.html", "Speaking Lab"], ["me.html", "Me"]];
+    const here0 = location.pathname.split("/").pop(); const here = ({ "": "index.html", "checkin.html": "index.html", "session.html": "schedule.html", "speak.html": "resources.html" })[here0] || here0;
+    const nav = [["index.html", "Today"], ["schedule.html", "Lessons"], ["resources.html", "Practice"], ["me.html", "Me"]];
+    const alias = { "": "index.html", "checkin.html": "index.html", "session.html": "schedule.html", "speak.html": "resources.html" };
     h.innerHTML = `<a class="brand" href="index.html"><span class="mark" aria-hidden="true"><svg viewBox="0 0 40 24"><path d="M2 20 Q20 -4 38 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M2 21h36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>${J.esc(J.C.programEn)} <span class="ar">${J.esc(J.C.programAr)}</span></a>
       <nav>${nav.map(n => `<a href="${n[0]}" class="${here === n[0] ? "on" : ""}">${n[1]}</a>`).join("")}</nav>
       <div class="who">${J.me() ? J.esc(J.me().name.split(" ")[0]) : ""}</div>`;

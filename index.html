@@ -1,36 +1,42 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jisr · English for Municipal Professionals</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -4 38 20' fill='none' stroke='%231d1d1f' stroke-width='4'/></svg>">
-<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/ready.js"></script><script src="assets/core.js"></script></head>
+<title>Jisr · Today</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -4 38 20' fill='none' stroke='%231d1d1f' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/ready.js"></script><script src="data/resources.js"></script><script src="assets/core.js"></script><script src="assets/checkin.js"></script><script src="assets/resources.js"></script></head>
 <body><header id="site-header"></header>
-<main class="wrap">
-  <section class="hero">
-    <p class="eyebrow" id="partners"></p>
-    <h1>English that works.</h1>
-    <p class="ar" style="font-size:1.5rem;margin:0 0 6px">جسر · الإنجليزية لبيئة العمل</p>
-    <p class="sub" id="tagline"></p>
+<main class="wrap" style="max-width:760px">
+  <section class="hero" style="padding:36px 0 18px">
+    <p class="eyebrow" id="date"></p>
+    <h1 id="hello">Welcome.</h1>
+    <p class="sub" id="sub" style="margin-bottom:0"></p>
   </section>
-
-  <section class="band center" id="today"></section>
-
-  <section class="grid g4" style="margin-top:18px">
-    <a class="tile" href="schedule.html"><div class="ico">📘</div><b>Lessons</b><div class="muted">All 64 sessions</div></a>
-    <a class="tile" href="resources.html"><div class="ico">🌐</div><b>Practice</b><div class="muted">127 free lessons</div></a>
-    <a class="tile" href="speak.html"><div class="ico">🎙</div><b>Speaking Lab</b><div class="muted">Talk and get feedback</div></a>
-    <a class="tile" href="me.html"><div class="ico">📈</div><b>My progress</b><div class="muted">Scores and activities</div></a>
-  </section>
+  <div id="steps"></div>
 </main>
-<footer class="wrap" id="foot" style="margin-top:40px"></footer>
+<footer class="wrap" id="foot" style="margin-top:40px;max-width:760px"></footer>
 <script>
 (function(){
-  const J=JISR,t=J.todayISO(),s=J.sessionByDate(t),nx=J.nextSession(t);
-  document.getElementById("partners").textContent=J.C.partnersEn;
-  document.getElementById("tagline").textContent=J.C.taglineEn+". Three sessions a week, from 8 November to 4 May.";
-  const T=document.getElementById("today");
-  if(s) T.innerHTML=`<p class="eyebrow">Today · Session ${s.n}</p><h2>${J.esc(s.themeEn)}</h2><p class="muted">${s.typeEn}</p>
-    <div class="row" style="justify-content:center;margin-top:18px"><a class="btn big" href="checkin.html">Check in</a><a class="btn alt big" href="session.html?n=${s.n}">Open lesson</a></div>`;
-  else if(nx) T.innerHTML=`<p class="eyebrow">Next session · ${J.fmtDate(nx.date)}</p><h2>${J.esc(nx.themeEn)}</h2><p class="muted">Session ${nx.n} · ${nx.typeEn}</p>
-    <div class="row" style="justify-content:center;margin-top:18px"><a class="btn big" href="session.html?n=${nx.n}">Preview the lesson</a></div>`;
-  else T.innerHTML=`<h2>The programme is complete. Congratulations! 🎓</h2>`;
+  const J=JISR,t=J.todayISO(),s=J.sessionByDate(t),nx=J.nextSession(t),u=J.me(),R=window.JISR_READY||[];
+  const h=new Date().getHours();
+  document.getElementById("date").textContent=J.fmtDate(t)+(s?` · Lesson ${s.n}`:"");
+  document.getElementById("hello").textContent=(h<12?"Good morning":h<18?"Good afternoon":"Good evening")+(u?", "+u.name.split(" ")[0]:"")+".";
+  document.getElementById("sub").innerHTML=s?`Today: <b>${J.esc(s.themeEn)}</b><br><span class="ar">${J.esc(s.themeAr)}</span>`:(nx?`No class today. Next class: <b>${J.fmtDate(nx.date)}</b>.<br><span class="ar">لا توجد جلسة اليوم</span>`:"The programme is complete. 🎓");
+  const S=document.getElementById("steps"); let k=0;
+  const step=(title,ar,html)=>{k++;const e=J.el(`<section class="band" style="padding:24px"><div class="row" style="gap:12px;margin-bottom:12px"><span class="num">${k}</span><div><h3 style="margin:0">${title}</h3><div class="ar muted" style="font-size:.9rem">${ar}</div></div></div><div data-b>${html||""}</div></section>`);S.appendChild(e);return e.querySelector("[data-b]");};
+  const lessonCard=x=>{const d=J.stepsDone(x.n).size,tot=J.LS.get("stepsTotal."+x.n,9),ready=R.includes(x.n),pct=Math.min(100,Math.round(100*d/tot));
+    if(!ready) return `<p class="muted">The materials for this lesson will appear here before ${J.fmtDate(x.date)}.</p>`;
+    return `<p style="margin:0 0 4px"><b>Lesson ${x.n}: ${J.esc(x.themeEn)}</b> <span class="muted">· ${x.typeEn}</span></p><div class="meter" style="background:var(--paper);margin:8px 0 6px"><i style="width:${pct}%"></i></div><p class="muted" style="font-size:.88rem;margin:0 0 14px">${d} of ${tot} steps done</p>
+      <a class="btn big" href="session.html?n=${x.n}">${d===0?"Start the lesson":d>=tot?"Review the lesson":"Continue the lesson"} →</a>`;};
+  if(s){
+    const c=step("Check in","سجّل حضورك"); JISR_CHECKIN.mount(c,{});
+    step("Today's lesson","درس اليوم",lessonCard(s));
+  } else {
+    // continue the most recent unfinished lesson (or preview the next one)
+    const held=J.S.filter(x=>x.date<=t&&R.includes(x.n)).reverse(), open=held.find(x=>J.stepsDone(x.n).size<J.LS.get("stepsTotal."+x.n,9));
+    if(open) step("Finish your last lesson","أكمل درسك السابق",lessonCard(open));
+    if(nx) step("Prepare for the next lesson","استعد للدرس القادم",lessonCard(nx));
+  }
+  const cur=s||nx||J.S.at(-1),ids=JISR_RESOURCES.week(cur.week).slice(0,3);
+  const ex=step("Extra practice","تدريب إضافي",`<p class="muted" style="margin-top:0">10 minutes a day makes the difference.</p><div class="grid g3">${ids.map(id=>JISR_RESOURCES.card(id,JISR_RESOURCES.R.items[id],cur.n)).join("")}</div>
+    <div class="row" style="margin-top:14px"><a class="btn alt" href="speak.html">🎙 Talk with the AI partner</a><a class="btn ghost" href="resources.html">All practice →</a></div>`);
+  JISR_RESOURCES.bindClicks(ex);
   document.getElementById("foot").textContent=`${J.C.partnersEn} · Instructor: ${J.C.instructor}`;
 })();
 </script></body></html>

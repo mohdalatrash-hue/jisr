@@ -1,38 +1,10 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Jisr · Check in</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -4 38 20' fill='none' stroke='%231d1d1f' stroke-width='4'/></svg>">
-<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script></head>
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script><script src="assets/checkin.js"></script></head>
 <body><header id="site-header"></header>
 <main class="wrap" style="max-width:460px">
   <section class="hero" style="padding-bottom:10px"><h1>Check in.</h1><p class="ar muted" style="font-size:1.2rem;margin:0">تسجيل الحضور</p></section>
   <div class="band" id="box" style="padding:28px"></div>
+  <p class="center" style="margin-top:16px"><a href="index.html">Go to Today →</a></p>
 </main>
-<script>
-(async function(){
-  const J=JISR,B=document.getElementById("box"),t=J.todayISO(),s=J.sessionByDate(t);
-  if(!s){const nx=J.nextSession(t);B.innerHTML=`<p class="center" style="font-size:1.15rem">No session today.<br><span class="ar muted">لا توجد جلسة اليوم</span></p>${nx?`<p class="center muted">Next: ${J.fmtDate(nx.date)}</p>`:""}`;return;}
-  const done=J.LS.get("checkins",{});
-  const success=(name,st,demo)=>{B.innerHTML=`<p class="center" style="font-size:3rem;margin:0">✓</p><h2 class="center">You're in, ${J.esc(name.split(" ")[0])}.</h2><p class="center muted">Session ${s.n}</p>${demo?'<p class="notice center">Demo mode: saved on this phone only.</p>':""}<p class="center" style="margin-top:18px"><a class="btn" href="session.html?n=${s.n}">Open today's lesson</a></p>`;};
-  let u=J.me();
-  if(done[t]&&u) return success(u.name,"P");
-  let who="";
-  if(!u){
-    who=`<label>Your name <span class="ar muted">اسمك</span></label><input id="nm" autocomplete="name"><label>Employee number <span class="ar muted">الرقم الوظيفي</span></label><input id="eid" inputmode="numeric">`;
-  } else who=`<p class="center" style="margin:0 0 6px">${J.esc(u.name)} <a href="#" id="chg" class="muted" style="font-size:.85rem">· not you?</a></p>`;
-  B.innerHTML=`${who}<label>Code on the screen <span class="ar muted">الرمز المعروض</span></label>
-    <input id="code" inputmode="numeric" maxlength="4" autocomplete="one-time-code" style="font-size:2.2rem;font-weight:700;letter-spacing:.4em;text-align:center">
-    <button class="btn big" id="go" style="width:100%;margin-top:18px">I'm here · حاضر</button><p id="msg" class="center" style="color:var(--bad)"></p>`;
-  const chg=document.getElementById("chg"); if(chg) chg.onclick=e=>{e.preventDefault();J.setMe(null);location.reload();};
-  document.getElementById("go").onclick=async()=>{
-    const msg=document.getElementById("msg"),code=document.getElementById("code").value.trim();msg.textContent="";
-    if(!u){ const sel=document.getElementById("who");
-      if(sel){ if(!sel.value) return msg.textContent="Choose your name."; u={id:sel.value,name:sel.options[sel.selectedIndex].text}; }
-      else { const name=document.getElementById("nm").value.trim(),id=document.getElementById("eid").value.trim(); if(!name||!id) return msg.textContent="Write your name and number."; u={id,name}; } }
-    if(!/^\d{4}$/.test(code)) return msg.textContent="Type the 4-digit code.";
-    const b=document.getElementById("go"); b.disabled=true;
-    let r=await J.api("checkin",{traineeId:u.id,name:u.name,date:t,session:s.n,code});
-    if(r.demo) r={ok:true,status:"P",demo:true};
-    if(r.ok){ J.setMe(u); done[t]=Date.now(); J.LS.set("checkins",done); success(u.name,r.status,r.demo); }
-    else { b.disabled=false; msg.textContent=r.error||"Try again."; if(!J.me()) u=null; }
-  };
-})();
-</script></body></html>
+<script>JISR_CHECKIN.mount(document.getElementById("box"),{});</script></body></html>

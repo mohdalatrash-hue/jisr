@@ -15,8 +15,8 @@
   if(!s){top.innerHTML='<p>Session not found.</p>';return;}
   document.title="Jisr · Session "+n+" · "+s.themeEn;
   const prev=J.sessionByN(n-1), next=J.sessionByN(n+1);
-  top.innerHTML=`<div class="row" style="justify-content:space-between"><span class="eyebrow">Week ${s.week} · Session ${n} of ${J.S.length} · ${J.fmtDate(s.date)}</span>
-   <span class="row no-print">${prev?`<a class="btn ghost sm" href="session.html?n=${prev.n}">← ${prev.n}</a>`:""}${next?`<a class="btn ghost sm" href="session.html?n=${next.n}">${next.n} →</a>`:""}</span></div>
+  top.innerHTML=`<div class="row" style="justify-content:space-between"><span class="eyebrow">Lesson ${n} · ${J.fmtDate(s.date)} · Week ${s.week}</span>
+   <a class="btn ghost sm no-print" href="schedule.html">All lessons</a></div>
    <h1 id="h1">${J.esc(s.themeEn)}</h1><p class="ar muted" style="margin-top:-6px">${J.esc(s.themeAr)} — ${J.esc(s.typeAr)}</p>`;
   window.JISR_DATA=function(d){ render(d); };
   const sc=document.createElement("script"); sc.src="data/sessions/s"+String(n).padStart(2,"0")+".js";
@@ -26,32 +26,46 @@
   function render(d){
     document.getElementById("h1").textContent=d.title||s.themeEn;
     const P=[]; // [key,labelEn,labelAr,fn]
-    P.push(["start","Start here","ابدأ هنا",el=>{
+    P.push(["start","Warm-up","تمهيد",el=>{
       el.innerHTML=`<div class="grid g2"><div class="card"><span class="eyebrow">Today you will · أهداف الجلسة</span><ul class="list">${(d.goals||[]).map(g=>`<li>${J.esc(g)}</li>`).join("")}</ul>
       ${s.ramadan?'<p class="notice">🌙 Ramadan timing — shorter in-class session; the rest is homework.</p>':""}</div>
       <div class="card teal"><span class="eyebrow">Warm-up · تمهيد</span><p style="font-size:1.1rem">${J.esc(d.warmup||"")}</p>
       ${d.grammar?`<span class="eyebrow">Language focus</span><h3 style="color:#fff">${J.esc(d.grammar.title)}</h3><ul class="list">${d.grammar.points.map(p=>`<li>${J.esc(p)}</li>`).join("")}</ul>`:""}</div></div>`;
       if(d.grammar&&d.grammar.quiz){const c=J.el(`<div class="card act" style="margin-top:14px"><span class="eyebrow">Grammar check</span><h3>🧩 ${J.esc(d.grammar.title)}</h3></div>`);A.quiz(c,d.grammar.quiz,{onScore:(r,m)=>J.saveScore(n,"grammar",r,m)});el.appendChild(c);}
     }]);
-    if(d.vocab) P.push(["vocab","Vocabulary","المفردات",el=>{const c=J.el('<div class="card act"><span class="eyebrow">Key words · كلمات أساسية</span><h3>🔤 Words for today</h3></div>');A.vocab(c,d.vocab);el.appendChild(c);
+    if(d.vocab) P.push(["vocab","Words","المفردات",el=>{const c=J.el('<div class="card act"><span class="eyebrow">Key words · كلمات أساسية</span><h3>🔤 Words for today</h3></div>');A.vocab(c,d.vocab);el.appendChild(c);
       if(d.vocabQuiz){const q=J.el('<div class="card act"><h3>✔ Vocabulary check</h3></div>');A.quiz(q,d.vocabQuiz,{onScore:(r,m)=>J.saveScore(n,"vocab",r,m)});el.appendChild(q);}}]);
-    if(d.listening) P.push(["listen","Listening","استماع",el=>d.listening.forEach(L=>A.listening(el,L,n))]);
-    if(d.reading) P.push(["read","Reading","قراءة",el=>d.reading.forEach(R=>A.reading(el,R,n))]);
+    if(d.listening) P.push(["listen","Listen","استماع",el=>d.listening.forEach(L=>A.listening(el,L,n))]);
+    if(d.reading) P.push(["read","Read","قراءة",el=>d.reading.forEach(R=>A.reading(el,R,n))]);
     if(d.roleplay) P.push(["role","Role-play","تمثيل أدوار",el=>d.roleplay.forEach(R=>A.roleplay(el,R,n))]);
-    if(d.speaking) P.push(["speak","Speaking","محادثة",el=>{ if(d.speaking.readAloud) A.readAloud(el,d.speaking.readAloud,n); (d.speaking.tasks||[]).forEach(t=>A.speakTask(el,t,n)); }]);
-    if(d.writing) P.push(["write","Writing","كتابة",el=>d.writing.forEach(W=>A.writing(el,W,n))]);
-    P.push(["more","More practice","تدريب إضافي",el=>{const X=JISR_RESOURCES,ids=X.week(s.week);
+    if(d.speaking) P.push(["speak","Speak","محادثة",el=>{ if(d.speaking.readAloud) A.readAloud(el,d.speaking.readAloud,n); (d.speaking.tasks||[]).forEach(t=>A.speakTask(el,t,n)); }]);
+    if(d.writing) P.push(["write","Write","كتابة",el=>d.writing.forEach(W=>A.writing(el,W,n))]);
+    P.push(["more","Extra practice","تدريب إضافي",el=>{const X=JISR_RESOURCES,ids=X.week(s.week);
       el.innerHTML=`<div class="act"><span class="eyebrow">Free extra practice · تدريب مجاني إضافي</span><h3>🌐 More on this week's topic</h3><p class="muted">Chosen to match this lesson. Each opens in a new tab.</p><div class="grid g3">${ids.map(id=>X.card(id,X.R.items[id],n)).join("")}</div></div>
       ${d.vocab?`<div class="act"><span class="eyebrow">Real pronunciation · النطق الحقيقي</span><h3>🗣 Hear today's words in real videos</h3><p class="muted">YouGlish plays real people saying each word.</p><div class="row" style="gap:8px">${d.vocab.map(v=>`<a class="btn alt sm" target="_blank" rel="noopener" href="${X.youglish(v[0])}" data-yg="${J.esc(v[0])}">${J.esc(v[0].split(/[\/(]/)[0].trim())}</a>`).join("")}</div></div>`:""}
       <p class="center" style="margin-top:6px"><a class="btn ghost" href="resources.html">See all free resources →</a></p>`;
       X.bindClicks(el); el.querySelectorAll("[data-yg]").forEach(a=>a.addEventListener("click",()=>J.saveScore(n,"open:pron:YouGlish "+a.dataset.yg,1,1)));}]);
     if(d.homework) P.push(["home","Homework","واجب منزلي",el=>{el.innerHTML=`<div class="card"><span class="eyebrow">Before next session · قبل الجلسة القادمة</span><h3>🏠 Homework</h3><ol class="list">${d.homework.map(h=>`<li>${J.esc(h)}</li>`).join("")}</ol>
       <p class="muted">Your scores are saved automatically. Check <a href="me.html">My progress</a>.</p></div>`;}]);
+    // move Homework before Extra practice
+    const hi=P.findIndex(p=>p[0]==="home"), mi=P.findIndex(p=>p[0]==="more"); if(hi>mi&&mi>=0){const h=P.splice(hi,1)[0];P.splice(mi,0,h);}
     tabs.innerHTML=""; panels.innerHTML="";
-    P.forEach((p,i)=>{const b=J.el(`<button data-k="${p[0]}">${p[1]} <span class="ar" style="font-weight:400;font-size:.8em">${p[2]}</span></button>`);tabs.appendChild(b);
+    const bar=J.el(`<div class="no-print" style="margin:6px 0 2px"><div class="row" style="justify-content:space-between;font-size:.85rem"><span class="muted" data-pt></span><span class="muted ar">خطوات الدرس</span></div><div class="meter" style="background:var(--alt);margin-top:6px"><i data-pb style="width:0"></i></div></div>`);
+    tabs.before(bar);
+    function refresh(){const d=J.stepsDone(n);let c=0;tabs.querySelectorAll("button").forEach(b=>{const ok=d.has(b.dataset.k);if(ok)c++;b.querySelector(".tick").textContent=ok?"✓":b.dataset.i;b.classList.toggle("done",ok);});
+      bar.querySelector("[data-pt]").textContent=`${c} of ${P.length} steps done`;J.LS.set("stepsTotal."+n,P.length);bar.querySelector("[data-pb]").style.width=Math.round(100*c/P.length)+"%";}
+    const go=i=>tabs.querySelectorAll("button")[i].click();
+    P.forEach((p,i)=>{const b=J.el(`<button data-k="${p[0]}" data-i="${i+1}"><span class="tick">${i+1}</span> ${p[1]}</button>`);tabs.appendChild(b);
       const pn=J.el(`<section class="panel" id="p-${p[0]}"></section>`);panels.appendChild(pn);p[3](pn);
-      b.onclick=()=>{tabs.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));panels.querySelectorAll(".panel").forEach(x=>x.classList.toggle("on",x===pn));J.stopSpeaking();history.replaceState(null,"","#"+p[0]);window.scrollTo({top:0});};});
-    const want=location.hash.slice(1); (tabs.querySelector(`[data-k="${want}"]`)||tabs.firstChild).click();
+      const last=i===P.length-1, nx=P[i+1];
+      const nav=J.el(`<div class="row no-print stepnav">${i>0?`<button class="btn ghost" data-prev>← Back</button>`:"<span></span>"}<button class="btn big" data-next>${last?"Finish lesson ✓":`Next: ${nx[1]} →`}</button></div>`);
+      pn.appendChild(nav);
+      nav.querySelector("[data-next]").onclick=()=>{J.markStep(n,p[0]);refresh();if(last){pn.querySelector(".stepnav").outerHTML=`<div class="band center"><h2>Lesson complete. Well done! 🎉</h2><p class="muted">أحسنت! أنهيت الدرس</p><div class="row" style="justify-content:center"><a class="btn" href="index.html">Back to Today</a>${next?`<a class="btn alt" href="session.html?n=${next.n}">Next lesson →</a>`:""}</div></div>`;}else go(i+1);};
+      const pv=nav.querySelector("[data-prev]"); if(pv) pv.onclick=()=>go(i-1);
+      b.onclick=()=>{tabs.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));panels.querySelectorAll(".panel").forEach(x=>x.classList.toggle("on",x===pn));J.stopSpeaking();history.replaceState(null,"","#"+p[0]);window.scrollTo({top:0});b.scrollIntoView({block:"nearest",inline:"center"});};});
+    document.addEventListener("jisr:progress",refresh); refresh();
+    const want=location.hash.slice(1), dn=J.stepsDone(n), firstOpen=P.findIndex(p=>!dn.has(p[0]));
+    (tabs.querySelector(`[data-k="${want}"]`)||tabs.querySelectorAll("button")[firstOpen<0?0:firstOpen]).click();
     window.addEventListener("hashchange",()=>{const b=tabs.querySelector(`[data-k="${location.hash.slice(1)}"]`);if(b&&!b.classList.contains("on"))b.click();});
   }
   document.getElementById("foot").innerHTML=`${J.esc(J.C.partnersEn)} · <span class="ar">${J.esc(J.C.partnersAr)}</span> · Instructor: ${J.esc(J.C.instructor)}`;

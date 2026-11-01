@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/speaklab.js"></script><script src="assets/core.js"></script><script src="assets/activities.js"></script></head>
 <body><header id="site-header"></header>
 <main class="wrap">
-  <section class="hero" style="padding-bottom:10px"><h1>Speaking Lab.</h1><p class="sub">Speak. Hear yourself. Improve.<br><span class="ar">تحدّث، استمع لنفسك، وتحسّن</span></p></section>
+  <p style="margin:18px 0 0"><a href="resources.html">← Practice</a></p><section class="hero" style="padding-top:12px;padding-bottom:10px"><h1>Speaking Lab.</h1><p class="sub">Speak. Hear yourself. Improve.<br><span class="ar">تحدّث، استمع لنفسك، وتحسّن</span></p></section>
   <div id="mic" class="notice" style="display:none"></div>
   <div class="tabs no-print" id="tabs">
     <button data-k="talk" class="on">🤖 Talk with AI <span class="ar">محادثة</span></button>
@@ -23,6 +23,7 @@
   L.scenarios.forEach(s=>{const t=J.el(`<a class="tile" href="#" style="padding:12px"><div class="ico">${s.icon}</div><b>${J.esc(s.en)}</b><div class="ar muted">${J.esc(s.ar)}</div></a>`);
     t.onclick=e=>{e.preventDefault();sc.querySelectorAll(".tile").forEach(x=>x.style.borderColor="");t.style.borderColor="var(--clay)";cb.innerHTML=`<div class="card"><h3>${s.icon} ${J.esc(s.en)}</h3></div>`;A.aiPartner(cb.firstChild,{scenario:s.scenario,title:s.en,n:0});cb.querySelector("details").open=true;};sc.appendChild(t);});
   const day=Math.floor(Date.now()/864e5),fr=document.getElementById("free");
+  setTimeout(()=>{const b=document.querySelector(`#tabs [data-k="${location.hash.slice(1)}"]`);if(b)b.click();},0);
   L.prompts.forEach((p,i)=>{ if(i<3) A.speakTask(fr,L.prompts[(day+i)%L.prompts.length],0); });
   fr.insertAdjacentHTML("beforeend",'<p class="muted">New topics appear every day. · مواضيع جديدة يوميًا</p>');
   A.readAloud(document.getElementById("drill"),[0,1,2,3,4,5].map(i=>L.drills[(day+i)%L.drills.length]),0);

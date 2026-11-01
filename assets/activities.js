@@ -158,6 +158,22 @@
       const r = J.el(`<div class="q"><div class="qt" style="font-size:1.08rem">${esc(s)}</div><div class="row no-print" style="margin-top:6px"><button class="btn alt sm" data-m>🔊 Model</button><button class="btn rec sm" data-r ${J.canListen() ? "" : "disabled"}>🎤 Read</button><span data-s class="score"></span></div><div class="diff" data-d style="margin-top:6px"></div></div>`);
       r.querySelector("[data-m]").onclick = () => J.speak(s, "A");
       const b = r.querySelector("[data-r]");
+      const T = window.JISR_TOOLS;
+      if (T) T.caps().then(c => { if (c.pron) { b.disabled = false; b.dataset.azure = "1"; b.textContent = "🎤 Read"; } });
+      b.addEventListener("click", async ev => {
+        if (b.dataset.azure !== "1") return;
+        ev.stopImmediatePropagation();
+        if (b._rec) { const rec = b._rec; b._rec = null; clearTimeout(b._t); b.classList.remove("live"); b.textContent = "⏳ Scoring…"; b.disabled = true;
+          try { const a = await rec.stop(), wav = await T.toWav16k(a.blob), u = J.me() || {};
+            const res = await J.api("pron", { traineeId: u.id, text: s, audio: wav.base64, seconds: wav.seconds, session: n });
+            if (res.ok) { r.querySelector("[data-d]").innerHTML = T.renderPron(res); r.querySelector("[data-s]").textContent = res.scores.pron + "%"; scores[i] = res.scores.pron;
+              const vals = Object.values(scores); J.saveScore(n, "read-aloud", Math.round(vals.reduce((x, y) => x + y, 0) / vals.length), 100); }
+            else r.querySelector("[data-d]").innerHTML = `<p class="muted">⚠ ${J.esc(res.error || "Try again")}</p>`;
+          } catch (e) { r.querySelector("[data-d]").innerHTML = `<p class="muted">⚠ ${J.esc(e.message)}</p>`; }
+          b.disabled = false; b.textContent = "🎤 Read again"; return; }
+        try { b._rec = await J.startRecording(); } catch (e) { return J.toast("Microphone: " + e.message); }
+        b.classList.add("live"); b.textContent = "■ Stop"; b._t = setTimeout(() => b._rec && b.click(), 20000);
+      }, true);
       b.onclick = async () => {
         b.classList.add("live"); b.textContent = "Listening…";
         try {
@@ -237,15 +253,8 @@
     const actName = req.kind + (req.title ? ":" + req.title : ":" + String(req.prompt).slice(0, 30)) + tag;
     const checker = (lt !== undefined || vp) ? `<div class="fb"><h4>Checker · <span class="ar">التدقيق</span></h4>${lt !== undefined ? T.renderLT(lt) : ""}${vp ? T.renderVocab(vp) : ""}${T.credit}</div>` : "";
     if (r && r.ok && r.feedback) {
-      const f = r.feedback;
-      target.innerHTML = `<div class="fb"><h4>AI feedback · <span class="ar">تقييم آلي</span> — ${esc(f.score)}/10</h4>
-        ${f.heard ? `<p class="muted">Heard: “${esc(f.heard)}”</p>` : ""}
-        <p>${esc(f.summary || "")}</p>
-        ${(f.corrections || []).length ? `<p><b>Corrections</b></p><ul class="list">${f.corrections.map(c => `<li><s>${esc(c.wrong)}</s> → <b>${esc(c.right)}</b> <span class="muted">${esc(c.why || "")}</span></li>`).join("")}</ul>` : ""}
-        ${(f.pronunciation || []).length ? `<p><b>Pronunciation</b></p><ul class="list">${f.pronunciation.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
-        ${f.better ? `<p><b>A better version</b></p><p class="script">${esc(f.better)}</p>` : ""}
-        ${f.arabic ? `<p class="ar">${esc(f.arabic)}</p>` : ""}</div>${checker}`;
-      J.saveScore(req.n, actName, Number(f.score) || 0, 10);
+      target.innerHTML = T.renderAI(r.feedback, req.kind) + checker;
+      J.saveScore(req.n, actName + (r.feedback.cefr ? " <" + r.feedback.cefr + ">" : ""), Number(r.feedback.score) || 0, 10);
       return;
     }
     // rule-based quick check (no AI)

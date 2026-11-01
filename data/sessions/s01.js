@@ -94,5 +94,5 @@ JISR_DATA({
     checklist: ["Name and age (optional)", "Job and department", "What you do every day", "Why you want to learn English", "Capital letters and full stops"],
     model: "My name is Faisal Alotaibi. I am 29 years old. I am a licensing officer in the municipality. Every day I check documents and answer questions from shop owners. I want to learn English because I want to help foreign investors and travel for training."
   }],
-  homework: ["Learn the 12 words: hide the Arabic and test yourself.", "Play the listening twice without the transcript and get 6/6.", "Record your self-introduction in the Speaking tab and try to get a higher score tomorrow.", "Write your profile card and press “Get feedback”."]
+  homework: ["Take the free EF SET level test (efset.org, 50 minutes) and keep your result. You will take it again at the end of the programme. · اختبر مستواك مجانًا", "Learn the 12 words: hide the Arabic and test yourself.", "Play the listening twice without the transcript and get 6/6.", "Record your self-introduction in the Speaking tab and try to get a higher score tomorrow.", "Write your profile card and press “Get feedback”."]
 });

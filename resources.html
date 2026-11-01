@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jisr · Resources</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -4 38 20' fill='none' stroke='%231d1d1f' stroke-width='4'/></svg>">
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="data/resources.js"></script><script src="assets/core.js"></script><script src="assets/resources.js"></script></head>
+<body><header id="site-header"></header>
+<main class="wrap">
+  <section class="hero" style="padding-bottom:14px"><h1>Practise more.</h1><p class="sub">The best free English lessons on the internet, chosen for your level and your work.<br><span class="ar">أفضل الدروس المجانية، مختارة لمستواك ولعملك</span></p></section>
+  <section class="band" id="week"></section>
+  <div class="tabs no-print" id="skills"></div>
+  <div class="row no-print" id="levels" style="margin:-6px 0 16px;gap:6px"></div>
+  <section class="grid g3" id="list"></section>
+  <p class="muted" style="font-size:.8rem;margin-top:26px">All lessons open on the provider's own website and remain their property: British Council LearnEnglish, BBC Learning English, VOA Learning English (public domain), Cambridge English, EF SET, ELLLO, ESL Lab, Perfect English Grammar, ego4u, Oxford Learner's Dictionaries, YouGlish, ESL Vault, Anki, LanguageTool.</p>
+</main>
+<script>
+(function(){
+  const J=JISR,X=JISR_RESOURCES,R=X.R,cur=J.sessionByDate(J.todayISO())||J.nextSession()||J.S.at(-1);
+  const W=document.getElementById("week"),ids=X.week(cur.week);
+  W.innerHTML=`<p class="eyebrow">This week · Week ${cur.week}</p><h2>${J.esc(cur.themeEn)}</h2><p class="muted" style="margin-top:-4px">Extra practice that matches this week's lessons.</p><div class="grid g3" style="margin-top:14px">${ids.map(id=>X.card(id,R.items[id],cur.n)).join("")}</div>`;
+  X.bindClicks(W);
+  let skill="all",lvl="all";
+  const S=document.getElementById("skills"),L=document.getElementById("levels"),list=document.getElementById("list");
+  const skills=[["all","All"]].concat(Object.entries(X.SK).map(([k,v])=>[k,v[1]]));
+  S.innerHTML=skills.map(([k,t])=>`<button data-k="${k}" class="${k==="all"?"on":""}">${t}</button>`).join("");
+  const levels=[["all","All levels"],["A","A1–A2"],["B1","B1"],["B2","B2"]];
+  L.innerHTML=levels.map(([k,t])=>`<button class="btn sm ${k==="all"?"":"alt"}" data-l="${k}">${t}</button>`).join("");
+  function fits(x){ if(lvl==="all"||/All/.test(x.l))return true; if(lvl==="A")return /A1|A2/.test(x.l); return x.l.includes(lvl)||(lvl==="B1"&&/A2–B1|B1\+|A2–B2/.test(x.l)); }
+  function draw(){ const items=Object.entries(R.items).filter(([id,x])=>(skill==="all"||x.s===skill)&&fits(x));
+    list.innerHTML=items.map(([id,x])=>X.card(id,x,0)).join("")||'<p class="muted">Nothing here yet.</p>'; X.bindClicks(list); }
+  S.querySelectorAll("button").forEach(b=>b.onclick=()=>{skill=b.dataset.k;S.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));draw();});
+  L.querySelectorAll("button").forEach(b=>b.onclick=()=>{lvl=b.dataset.l;L.querySelectorAll("button").forEach(x=>x.classList.toggle("alt",x!==b));draw();});
+  draw();
+})();
+</script></body></html>

@@ -87,5 +87,5 @@ JISR_DATA({
     checklist: ["What the department is responsible for", "Team size and main services", "A challenge + because", "A plan + so", "and / but / because / so"],
     model: "The Licensing Department is responsible for shop, restaurant and workshop licences in the city. There are 22 employees and we process about 400 applications a month. Most applications are online, but some people still visit the counter. Our biggest challenge is incomplete documents, because applicants often forget something. So we want to improve our website and add a clear checklist in Arabic and English."
   }],
-  homework: ["Before the autumn break: finish all activities in Sessions 1–6 with 80% or more.", "Write your department profile and get feedback.", "Record “Your department in one minute” three times — keep the best.", "During the break: use the Speaking Lab for 10 minutes a day. · خلال الإجازة: ١٠ دقائق يوميًا في مختبر المحادثة"]
+  homework: ["Before the autumn break: finish all activities in Sessions 1–6 with 80% or more.", "Write your department profile and get feedback. Then paste it into Write & Improve (writeandimprove.com/free) to see its CEFR level.", "Record “Your department in one minute” three times — keep the best.", "During the break: use the Speaking Lab for 10 minutes a day. · خلال الإجازة: ١٠ دقائق يوميًا في مختبر المحادثة"]
 });

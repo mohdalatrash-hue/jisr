@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Jisr · Session</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'><path d='M2 20 Q20 -6 38 20' fill='none' stroke='%23c4553a' stroke-width='4'/></svg>">
-<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script><script src="assets/activities.js"></script></head>
+<link rel="stylesheet" href="assets/app.css"><script src="config.js"></script><script src="data/calendar.js"></script><script src="assets/core.js"></script><script src="assets/activities.js"></script><script src="data/resources.js"></script><script src="assets/resources.js"></script><script src="assets/tools.js"></script></head>
 <body><header id="site-header"></header>
 <main class="wrap">
   <div id="top"></div>
@@ -40,6 +40,11 @@
     if(d.roleplay) P.push(["role","Role-play","تمثيل أدوار",el=>d.roleplay.forEach(R=>A.roleplay(el,R,n))]);
     if(d.speaking) P.push(["speak","Speaking","محادثة",el=>{ if(d.speaking.readAloud) A.readAloud(el,d.speaking.readAloud,n); (d.speaking.tasks||[]).forEach(t=>A.speakTask(el,t,n)); }]);
     if(d.writing) P.push(["write","Writing","كتابة",el=>d.writing.forEach(W=>A.writing(el,W,n))]);
+    P.push(["more","More practice","تدريب إضافي",el=>{const X=JISR_RESOURCES,ids=X.week(s.week);
+      el.innerHTML=`<div class="act"><span class="eyebrow">Free extra practice · تدريب مجاني إضافي</span><h3>🌐 More on this week's topic</h3><p class="muted">Chosen to match this lesson. Each opens in a new tab.</p><div class="grid g3">${ids.map(id=>X.card(id,X.R.items[id],n)).join("")}</div></div>
+      ${d.vocab?`<div class="act"><span class="eyebrow">Real pronunciation · النطق الحقيقي</span><h3>🗣 Hear today's words in real videos</h3><p class="muted">YouGlish plays real people saying each word.</p><div class="row" style="gap:8px">${d.vocab.map(v=>`<a class="btn alt sm" target="_blank" rel="noopener" href="${X.youglish(v[0])}" data-yg="${J.esc(v[0])}">${J.esc(v[0].split(/[\/(]/)[0].trim())}</a>`).join("")}</div></div>`:""}
+      <p class="center" style="margin-top:6px"><a class="btn ghost" href="resources.html">See all free resources →</a></p>`;
+      X.bindClicks(el); el.querySelectorAll("[data-yg]").forEach(a=>a.addEventListener("click",()=>J.saveScore(n,"open:pron:YouGlish "+a.dataset.yg,1,1)));}]);
     if(d.homework) P.push(["home","Homework","واجب منزلي",el=>{el.innerHTML=`<div class="card"><span class="eyebrow">Before next session · قبل الجلسة القادمة</span><h3>🏠 Homework</h3><ol class="list">${d.homework.map(h=>`<li>${J.esc(h)}</li>`).join("")}</ol>
       <p class="muted">Your scores are saved automatically. Check <a href="me.html">My progress</a>.</p></div>`;}]);
     tabs.innerHTML=""; panels.innerHTML="";

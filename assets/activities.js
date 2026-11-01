@@ -217,17 +217,25 @@
     container.appendChild(box);
   }
 
-  /* ---------- AI FEEDBACK (backend Gemini) with offline fallback ---------- */
+  /* ---------- FEEDBACK: AI (Gemini, when switched on) + free checkers (LanguageTool, CEFR-J word levels) ---------- */
   async function feedback(target, req) {
     target.innerHTML = `<div class="fb">⏳ Checking…</div>`;
-    const u = J.me() || {};
-    let r = null;
+    const u = J.me() || {}, T = window.JISR_TOOLS;
+    const text = (req.kind === "speaking" ? req.transcript : req.text) || "";
+    let aiP = Promise.resolve(null);
     if (J.online) {
-      const payload = { traineeId: u.id, name: u.name, kind: req.kind, prompt: req.prompt, level: req.level || "A2-B1", session: req.n };
+      const payload = { traineeId: u.id, kind: req.kind, prompt: req.prompt, level: req.level || "A2-B1", session: req.n };
       if (req.kind === "speaking") { payload.transcript = req.transcript; payload.seconds = Math.round(req.secs); if (req.audio && req.audio.base64.length < 2.5e6) { payload.audio = req.audio.base64; payload.mime = req.audio.mime; } }
       else { payload.text = req.text; payload.checklist = req.checklist; }
-      r = await J.api("feedback", payload);
+      aiP = J.api("feedback", payload);
     }
+    const ltP = T && req.kind === "writing" ? T.languageTool(text) : Promise.resolve(undefined);
+    const vpP = T && text ? T.vocabProfile(text) : Promise.resolve(null);
+    const [r, lt, vp] = await Promise.all([aiP, ltP, vpP]);
+    const cats = {}; (lt || []).forEach(m => cats[m.cat] = (cats[m.cat] || 0) + 1);
+    const tag = (Object.keys(cats).length ? " [" + Object.entries(cats).map(([k, v]) => k + "×" + v).join(",") + "]" : "") + (vp ? " {" + vp.reach + "}" : "");
+    const actName = req.kind + (req.title ? ":" + req.title : ":" + String(req.prompt).slice(0, 30)) + tag;
+    const checker = (lt !== undefined || vp) ? `<div class="fb"><h4>Checker · <span class="ar">التدقيق</span></h4>${lt !== undefined ? T.renderLT(lt) : ""}${vp ? T.renderVocab(vp) : ""}${T.credit}</div>` : "";
     if (r && r.ok && r.feedback) {
       const f = r.feedback;
       target.innerHTML = `<div class="fb"><h4>AI feedback · <span class="ar">تقييم آلي</span> — ${esc(f.score)}/10</h4>
@@ -236,30 +244,26 @@
         ${(f.corrections || []).length ? `<p><b>Corrections</b></p><ul class="list">${f.corrections.map(c => `<li><s>${esc(c.wrong)}</s> → <b>${esc(c.right)}</b> <span class="muted">${esc(c.why || "")}</span></li>`).join("")}</ul>` : ""}
         ${(f.pronunciation || []).length ? `<p><b>Pronunciation</b></p><ul class="list">${f.pronunciation.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
         ${f.better ? `<p><b>A better version</b></p><p class="script">${esc(f.better)}</p>` : ""}
-        ${f.arabic ? `<p class="ar">${esc(f.arabic)}</p>` : ""}</div>`;
-      J.saveScore(req.n, req.kind + (req.title ? ":" + req.title : ":" + req.prompt.slice(0, 30)), Number(f.score) || 0, 10);
+        ${f.arabic ? `<p class="ar">${esc(f.arabic)}</p>` : ""}</div>${checker}`;
+      J.saveScore(req.n, actName, Number(f.score) || 0, 10);
       return;
     }
-    // offline / fallback: rule-based checks
-    const text = req.kind === "speaking" ? req.transcript : req.text, w = J.words(text), n = w.length;
-    const uniq = new Set(w).size, sentences = (text.match(/[.!?]/g) || []).length;
-    const notes = [];
+    // rule-based quick check (no AI)
+    const w = J.words(text), n = w.length, uniq = new Set(w).size, sentences = (text.match(/[.!?]/g) || []).length, notes = [];
     if (req.kind === "speaking") {
       const wpm = req.secs ? Math.round(n / (req.secs / 60)) : 0;
       notes.push(`You spoke ${n} words in ${Math.round(req.secs)} s (≈${wpm} words/min). Aim for 70–110 at this level.`);
-      if (!text) notes.push("No speech was recognised. Speak closer to the microphone, in Chrome/Edge/Safari.");
+      if (!text) notes.push("No speech was recognised. Speak closer to the microphone, in Chrome or Safari.");
     } else {
       if (req.min && n < req.min) notes.push(`Too short: ${n} words (target ${req.min}–${req.max}).`);
       if (req.max && n > req.max * 1.3) notes.push(`A little long: ${n} words (target ${req.min}–${req.max}).`);
-      if (!/^[A-Z]/.test(text.trim())) notes.push("Start with a capital letter.");
       if (sentences < 2) notes.push("Use full sentences that end with a full stop (.)");
-      if (/\bi\b/.test(text)) notes.push("Write the pronoun “I” as a capital letter.");
     }
-    const issues = notes.length - (req.kind === "speaking" ? 1 : 0);
-    notes.push(`Vocabulary range: ${uniq} different words.`);
-    const sc = Math.max(1, Math.min(10, Math.round((Math.min(n, (req.min || 40)) / (req.min || 40)) * 6 + Math.min(uniq / Math.max(n, 1), .8) * 5) - issues));
-    target.innerHTML = `<div class="fb"><h4>Quick check — ${sc}/10</h4><ul class="list">${notes.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p class="muted" style="font-size:.85rem">Full AI feedback (grammar, corrections, pronunciation) appears here once the program’s AI service is switched on. Your teacher can still review your work.</p></div>`;
-    J.saveScore(req.n, req.kind + (req.title ? ":" + req.title : ":" + String(req.prompt).slice(0, 30)), sc, 10);
+    const issues = notes.length - (req.kind === "speaking" ? 1 : 0) + Math.min(4, Math.ceil((lt || []).length / 2));
+    const lvlBonus = vp ? ({ A1: 0, A2: 0, B1: 1, B2: 1 }[vp.reach] || 0) : 0;
+    const sc = Math.max(1, Math.min(10, Math.round((Math.min(n, (req.min || 40)) / (req.min || 40)) * 6 + Math.min(uniq / Math.max(n, 1), .8) * 5) - issues + lvlBonus));
+    target.innerHTML = `<div class="fb"><h4>Score — ${sc}/10</h4>${notes.length ? `<ul class="list">${notes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>${checker}`;
+    J.saveScore(req.n, actName, sc, 10);
   }
 
   window.JISR_ACT = { quiz, vocab, listening, reading, roleplay, aiPartner, readAloud, speakTask, writing, feedback };
